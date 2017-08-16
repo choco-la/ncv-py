@@ -1,0 +1,14 @@
+^[0-9]+$
+\.
+# comment out
+# blank line
+
+# blank line
+^text$
+# invalid regex
+(invalid_regex
+^/hb ifseetno [0-9]+$
+# doublequote
+"
+# singlequote
+'

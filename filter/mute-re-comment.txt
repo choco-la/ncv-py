@@ -1,0 +1,19 @@
+^/hb ifseetno [0-9]+$
+
+# cruise
+^/vote start 『延長アンケート』<br>引き続きこの放送を視聴しますか？（過半数の支持で延長） はい いいえ$
+^『延長アンケート』（締め切りまであと[1-5]秒?です）<br>引き続きこの放送を視聴しますか？（過半数の支持で延長）$
+^あと[1-5]秒で「延長アンケート」を開始します$
+^/crpanel (?:start|end)
+^/vote stop$
+^/panel clear$
+^/clear$
+^/commentmode normal$
+^/vote showresult text_per (?:[0-9]|[\s])+$
+^/stop$
+^/play rtmp:rtmp://
+^/perm <FONT COLOR="#FF9900">放送開始：
+^/press line
+^/press style
+^/uadpoint
+^/coupon
