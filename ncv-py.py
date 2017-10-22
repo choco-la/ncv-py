@@ -167,8 +167,9 @@ def _main():
                 # To tell the data is partial or not,
                 # parse it before logging.
                 parsed = cparser.parse_comment(decdata)
-                if (logFile is not None and
-                        parsed["tag"] != "partial"):
+                if logFile is None:
+                    pass
+                elif parsed["tag"] != "partial":
                     cview.write_file(decdata, logFile)
 
                 if parsed["tag"] == "chat":

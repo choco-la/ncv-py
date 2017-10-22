@@ -7,7 +7,7 @@ Load from the parent directory.
 import sys
 import re
 import os
-from typing import (Optional, Tuple)
+from typing import Tuple
 import unicodedata
 import json
 
@@ -39,10 +39,10 @@ def pull_usersession(cookie: str) -> str:
         Usersession value.
     """
     try:
-        if re.match(r".+\.sqlite$", cookie):
+        if cookie.endswith(".sqlite"):
             usersession = (nicookie
                            .pull_usrsess_fx(cookie))
-        elif re.match(r".+\.wget$", cookie):
+        elif cookie.endswith(".wget"):
             usersession = (nicookie
                            .pull_usrsess_wg(cookie))
         else:
@@ -100,7 +100,7 @@ def mk_dir(dir: str) -> None:
         error_exit(err, dir)
 
 
-def decode_data(raw: bytes, partial: Optional[str]=None) -> str:
+def decode_data(raw: bytes, partial: str=None) -> str:
     """Decode the data recieved from a socket.
 
     Decode recieved chat data to UTF-8.

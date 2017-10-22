@@ -9,23 +9,23 @@ import http.cookiejar
 
 
 def _main():
-    if len(sys.argv) > 1:
-        for cookie in sys.argv[1:]:
-            try:
-                if re.match(r".+\.sqlite$", cookie):
-                    nicoUserSess = pull_usrsess_fx(cookie)
-                elif re.match(r".+\.wget$", cookie):
-                    nicoUserSess = pull_usrsess_wg(cookie)
-                else:
-                    nicoUserSess = pull_usrsess_lwp(cookie)
-            except:
-                trace = sys.exc_info()[1]
-                print("[ERR] {0}: {1}".format(cookie, trace))
-            else:
-                print("{0}: {1}".format(cookie, nicoUserSess))
-    else:
+    if len(sys.argv) <= 1:
         _show_usage()
         exit(1)
+
+    for cookie in sys.argv[1:]:
+        try:
+            if cookie.endswith(".sqlite"):
+                nicoUserSess = pull_usrsess_fx(cookie)
+            elif elif cookie.endswith(".wget"):
+                nicoUserSess = pull_usrsess_wg(cookie)
+            else:
+                nicoUserSess = pull_usrsess_lwp(cookie)
+        except:
+            trace = sys.exc_info()[1]
+            print("[ERR] {0}: {1}".format(cookie, trace))
+        else:
+            print("{0}: {1}".format(cookie, nicoUserSess))
 
 
 def _show_usage():
@@ -48,9 +48,9 @@ def pull_usrsess_fx(cookiedb: str) -> str:
         dbcursor = dbconnection.cursor()
 
         dbstatement = 'SELECT "value" \
-                        FROM "moz_cookies" \
-                        WHERE "host" = ".nicovideo.jp" \
-                        AND "name" = "user_session"'
+                       FROM "moz_cookies" \
+                       WHERE "host" = ".nicovideo.jp" \
+                       AND "name" = "user_session"'
         dbcursor.execute(dbstatement)
         usersession = dbcursor.fetchone()[0]
     return usersession
