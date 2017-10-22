@@ -68,8 +68,9 @@ class MatchFilter():
             try:
                 # escaping quote/dquote is not needed.
                 regex = re.compile(word.replace(r"\\", r"\\"))
-            # invalid regex causes sre_constants.error
+            # Invalid regex causes sre_constants.error,
             # but NameError occurs.
+            # -> `import sre_constants.error` is needed.
             except Exception as err:
                 pass
             else:

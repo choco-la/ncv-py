@@ -37,7 +37,7 @@ def regist_nickname(id: str,
     name = name.replace(r"\\", r"\\")
     name = name.replace(r'"', r'\"')
 
-    # load current json.
+    # Load current json.
     with open(filepath, "r") as jsonf:
         namedict = decoder.decode(jsonf.read())
 
@@ -86,7 +86,7 @@ def retrieve_name(id: str) -> str:
         The retrieved username if it succeeded,
         otherwise The userID if it failed.
     """
-    # not too Excessive requests.
+    # Not to send Excessive requests.
     sleep(1)
     try:
         return retr_name_seiga(id)
@@ -131,6 +131,7 @@ def retr_name_iframe(id: str) -> str:
 
     Returns:
         Retrieved username.
+
     TODO:
         Use not re but html parser.
         ElementTree causes a ParseError.

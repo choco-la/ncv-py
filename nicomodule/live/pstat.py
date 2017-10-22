@@ -112,7 +112,7 @@ class LivePlayerStatus():
                    .firstChild.data.strip())
         self.start = int(msstart)
 
-        # official program dont has default_community key.
+        # Official programs don't has default_community key.
         try:
             self.community = (streamtag.getElementsByTagName(
                                 "default_community")[0]
@@ -120,7 +120,7 @@ class LivePlayerStatus():
         except AttributeError as err:
             self.community = "official"
 
-        # official program dont has owner_name key.
+        # Official programs don't has owner_name key.
         try:
             self.owner = (streamtag.getElementsByTagName("owner_name")[0]
                           .firstChild.data.strip())
@@ -131,7 +131,7 @@ class LivePlayerStatus():
         self.seetno = (usertag.getElementsByTagName("room_seetno")[0]
                        .firstChild.data.strip())
 
-        # some official program dont has rtmpurl key.
+        # Some official programs don't has rtmpurl key.
         rtmp = body.getElementsByTagName("rtmp")[0]
         try:
             self.rtmpurl = (rtmp.getElementsByTagName("url")[0]

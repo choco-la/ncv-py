@@ -48,7 +48,7 @@ def parse_comment(dom: str) -> dict:
             }
     else:
         tag = "chat"
-        # KeyError on official program.
+        # KeyError occurs on official programs.
         try:
             commentno = chat.attributes["no"].value
         except KeyError as err:
@@ -57,19 +57,19 @@ def parse_comment(dom: str) -> dict:
         time = chat.attributes["date"].value
         userid = chat.attributes["user_id"].value
 
-        # General members dont have premium key.
+        # Free members don't have premium key.
         try:
             premium = chat.attributes["premium"].value
         except KeyError as err:
             premium = "0"
 
-        # Raw-id user dont have anonymity key.
+        # ID users don't have anonymity key.
         try:
             anonymity = chat.attributes["anonymity"].value
         except KeyError as err:
             anonymity = "0"
 
-        # Owner dont has locale key.
+        # Owner don't has locale key.
         try:
             locale = chat.attributes["locale"].value
         except KeyError as err:

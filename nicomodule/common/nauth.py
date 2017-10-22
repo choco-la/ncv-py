@@ -57,7 +57,7 @@ def is_valid_email(text: str) -> bool:
     Returns:
         True if it is valid, otherwise False.
     """
-    # Regex-pattern parts for email addressed.
+    # Regex-pattern parts for email addresses.
     username = r"[a-zA-Z0-9_.-]+"
     host = r"(?:[a-zA-Z0-9_-]+\.)+[a-z]{2,8}"
 

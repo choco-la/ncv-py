@@ -17,7 +17,7 @@ def _main():
         try:
             if cookie.endswith(".sqlite"):
                 nicoUserSess = pull_usrsess_fx(cookie)
-            elif elif cookie.endswith(".wget"):
+            elif cookie.endswith(".wget"):
                 nicoUserSess = pull_usrsess_wg(cookie)
             else:
                 nicoUserSess = pull_usrsess_lwp(cookie)

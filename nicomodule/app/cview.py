@@ -152,7 +152,7 @@ def handle_chat(parsed: dict,
                   registname,
                   parsed["time"],
                   confdict["p-nickNameId"])
-                # reload namemap.
+                # Reload namemap.
                 namemap = load_json(
                             confdict["p-nickNameId"])
             elif parsed["anonymity"] == "1":
@@ -161,7 +161,7 @@ def handle_chat(parsed: dict,
                   registname,
                   parsed["time"],
                   confdict["p-nickNameAnon"])
-                # reload namemap.
+                # Reload namemap.
                 namemap = load_json(
                             confdict["p-nickNameAnon"])
             toreload = True
@@ -222,8 +222,8 @@ def handle_chat(parsed: dict,
         elif confdict["narrow"] is True:
             narrow_comment(parsed, wchar)
 
-    # break when /disconnect is sent by admin/broadcaster.
-    # if all() returns True, isDisconnected becomes False.
+    # Break when /disconnect is sent by admin/broadcaster.
+    # If all() returns True, isDisconnected becomes False.
     isdisconnected = all([parsed["content"] == "/disconnect",
                           int(parsed["premium"]) > 1])
 
@@ -242,19 +242,19 @@ def show_comment(parsed: dict, wchar: int) -> None:
     Returns:
         None
     """
-    # premium member
+    # Premium member
     if parsed["premium"] == "1":
         pmark = "P"
         color = "default"
-    # administrator
+    # Administrator
     elif parsed["premium"] == "2":
         pmark = "A"
         color = "darkpurple"
-    # owner
+    # Owner
     elif parsed["premium"] == "3":
         pmark = "O"
         color = "sky"
-    # bsp
+    # BSP
     elif parsed["premium"] == "7":
         pmark = "B"
         color = "blue"
@@ -262,7 +262,7 @@ def show_comment(parsed: dict, wchar: int) -> None:
         pmark = " "
         color = "default"
 
-    # truncate display name to configured length.
+    # Truncate display name to configured length.
     namearea = "[{2: ^" + str(parsed["namelen"] - wchar) + "}]"
     fullcmt = (("{0}:{1}" + namearea + " {3} [{4}]")
                .format(parsed["no"],
@@ -287,16 +287,16 @@ def narrow_comment(parsed: dict, wchar: int) -> None:
     Returns:
         None
     """
-    # premium member
+    # Premium member
     if parsed["premium"] == "1":
         color = "default"
-    # administrator
+    # Administrator
     elif parsed["premium"] == "2":
         color = "darkpurple"
-    # owner
+    # Owner
     elif parsed["premium"] == "3":
         color = "sky"
-    # bsp
+    # BSP
     elif parsed["premium"] == "7":
         color = "blue"
     else:
@@ -304,10 +304,19 @@ def narrow_comment(parsed: dict, wchar: int) -> None:
 
     namearea = "[{0: ^" + str(8 - wchar) + "}]"
     nname, _ = trunc_name(parsed["nickname"], 8)
-    # which is better,
+    # Which is better,
     # substrings re.sub([letter count], ...)
     # or
     # text / (n: {2, 3, 4...}) < [count] => text / n
+    """
+    Format is like:
+
+    [8_UserId] comment com
+               ment commen
+               t comment
+
+    but _ is white space.
+    """
     ncontent = re.sub(r"(?P<m>.{,16})",
                       "{0}\g<m>{1}".format(" " * 11,
                                            os.linesep),
@@ -367,11 +376,11 @@ def to_regist(text: str, uid: str, namemap: dict) -> bool:
     if re.match(r".*[@＠].+$", text):
         try:
             prop = namemap[uid]
-        # not registered.
+        # Not registered.
         except KeyError as err:
             return True
 
-        # if not fixed, register nickname
+        # If nickname is not fixed, register nickname.
         if prop["fixed"] == 1:
             return False
         elif prop["fixed"] == 0:
@@ -398,13 +407,13 @@ def assign_nickname(uid: str,
         A tuple of the nickname and a boolean value
         whether the name was newly registered.
     """
-    # return name if already registered.
+    # Return name if already registered.
     try:
         return (namemap[uid]["name"], False)
     except KeyError as err:
         pass
 
-    # retrieve username if not anon comment.
+    # Retrieve username if not anon comment.
     if isanon == "0":
         try:
             return (nickname.retrieve_name(uid), True)
@@ -427,11 +436,11 @@ def trunc_name(orig: str, limit: int) -> Tuple[str, int]:
             A tuple of the truncated name/userID and
             a number of double width characters.
     """
-    # a number of double width characters.
+    # A number of double width characters.
     wchar = 0
-    # truncated name width.
+    # Truncated name width.
     width = 0
-    # truncated name
+    # Truncated name.
     trunc = ""
 
     for char in list(orig):
@@ -443,7 +452,7 @@ def trunc_name(orig: str, limit: int) -> Tuple[str, int]:
             elif get_chr_width(char) == 2:
                 width += 2
                 wchar += 1
-        # only 1 width acceptable.
+        # Only 1 width acceptable.
         elif width == limit - 1:
             if get_chr_width(char) == 1:
                 trunc += char
