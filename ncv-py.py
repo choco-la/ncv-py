@@ -92,15 +92,52 @@ def _main():
         elif confDict["use_cmt_filter"] is False:
             cmtFilter = None
 
-    # Check if liveId is valid format.
-    liveId = parsedArgs.url
-    try:
-        liveId = nicoid.grep_lv(liveId)
-    except ValueError as err:
+    if os.path.basename(parsedArgs.url) != "getplayerstatus.xml":
+        # Check if liveId is valid format.
+        liveId = parsedArgs.url
         try:
-            liveId = nicoid.grep_co(liveId)
+            liveId = nicoid.grep_lv(liveId)
         except ValueError as err:
+            try:
+                liveId = nicoid.grep_co(liveId)
+            except ValueError as err:
+                cview.error_exit(err, parsedArgs.url)
+
+        # If cookie does't exist, try to login.
+        if not os.path.exists(parsedArgs.cookie):
+            cview.login_nico(parsedArgs.cookie)
+        userSession = cview.pull_usersession(parsedArgs.cookie)
+
+        statusXml = pstat.get_live_player_status(userSession, liveId)
+        plyStat = pstat.LivePlayerStatus(statusXml)
+    elif os.path.basename(parsedArgs.url) == "getplayerstatus.xml":
+        """
+        Use local getplayerstatus.xml file.
+        This can retrieved by:
+
+        javascript:(function () {
+            const host = '//live.nicovideo.jp/api/getplayerstatus?v=';
+            const liveId = window.location.pathname.split('/').reverse()[0];
+            const url = host + liveId;
+            window.open(url, '_blank');
+        })()
+
+        on live page.
+        """
+        try:
+            with open(parsedArgs.url, "r") as xmlopen:
+                statusXml = xmlopen.read()
+            plyStat = pstat.LivePlayerStatus(statusXml)
+            liveId = plyStat.lvid
+        # xml.parsers.expat.ExpatError,
+        # FileNotFoundError, etc...
+        except Exception as err:
             cview.error_exit(err, parsedArgs.url)
+
+    # Check program status: ended/deleted/comingsoon.
+    if plyStat.errcode is not None:
+        sys.exit("[INFO] program: {0} {1}"
+                 .format(liveId, plyStat.errcode))
 
     # Check if logLimit is valid format.
     if (parsedArgs.limit >= 0 and parsedArgs.limit <= 1000):
@@ -109,19 +146,6 @@ def _main():
         logLimit = 0
     elif parsedArgs.limit > 1000:
         logLimit = 1000
-
-    # If cookie does't exist, try to login.
-    if not os.path.exists(parsedArgs.cookie):
-        cview.login_nico(parsedArgs.cookie)
-    userSession = cview.pull_usersession(parsedArgs.cookie)
-
-    # Check program status: ended/deleted/comingsoon.
-    statusXml = (pstat
-                 .get_live_player_status(userSession, liveId))
-    plyStat = pstat.LivePlayerStatus(statusXml)
-    if plyStat.errcode is not None:
-        sys.exit("[INFO] program: {0} {1}"
-                 .format(liveId, plyStat.errcode))
 
     # If --save-log is true, define logFile and write program data.
     if parsedArgs.save_log is True:
