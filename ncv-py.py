@@ -20,7 +20,7 @@ from nicomodule.app import cview
 
 
 def _main():
-    # initial
+    # Initial configurations.
     confDict = {
         "cookieDir": os.path.join("cookie", ""),
         "filterDir": os.path.join("filter", ""),
@@ -34,7 +34,7 @@ def _main():
         "nameLength": 12,
         "narrow": False
     }
-    # path to file.
+    # Path to file.
     confDict["p-muteReCmt"] = os.path.join(confDict["filterDir"],
                                            confDict["muteReCmt"])
     confDict["p-nickNameId"] = os.path.join(confDict["filterDir"],
@@ -51,7 +51,7 @@ def _main():
 
     parsedArgs = parse_args(confDict)
 
-    # if narrow explicited or configured, True.
+    # If narrow option is explicited or configured, True.
     if confDict["narrow"] is True:
         pass
     elif confDict["narrow"] is False:
@@ -71,7 +71,7 @@ def _main():
         try:
             cmtFilter = (genfilter.MatchFilter(confDict["p-muteReCmt"]))
             confDict["use_cmt_filter"] = True
-        # disable comment filtering in case error occured.
+        # Disable comment filtering if any errors occurred.
         except IOError as err:
             print("[ERR] {0}: comment filter disabled."
                   .format(confDict["p-muteReCmt"]),
@@ -82,7 +82,7 @@ def _main():
         if confDict["use_cmt_filter"] is True:
             try:
                 cmtFilter = (genfilter.MatchFilter(confDict["p-muteReCmt"]))
-            # disable comment filtering in case error occured.
+            # Disable comment filtering if any errors occurred.
             except IOError as err:
                 print("[ERR] {0}: comment filter disabled."
                       .format(confDict["p-muteReCmt"]),
@@ -92,7 +92,7 @@ def _main():
         elif confDict["use_cmt_filter"] is False:
             cmtFilter = None
 
-    # check if liveId is valid format.
+    # Check if liveId is valid format.
     liveId = parsedArgs.url
     try:
         liveId = nicoid.grep_lv(liveId)
@@ -102,7 +102,7 @@ def _main():
         except ValueError as err:
             cview.error_exit(err, parsedArgs.url)
 
-    # check if logLimit is valid format.
+    # Check if logLimit is valid format.
     if (parsedArgs.limit >= 0 and parsedArgs.limit <= 1000):
         logLimit = parsedArgs.limit
     elif parsedArgs.limit < 0:
@@ -110,12 +110,12 @@ def _main():
     elif parsedArgs.limit > 1000:
         logLimit = 1000
 
-    # If not exist, try to login.
+    # If cookie does't exist, try to login.
     if not os.path.exists(parsedArgs.cookie):
         cview.login_nico(parsedArgs.cookie)
     userSession = cview.pull_usersession(parsedArgs.cookie)
 
-    # check program status: ended/deleted/comingsoon.
+    # Check program status: ended/deleted/comingsoon.
     statusXml = (pstat
                  .get_live_player_status(userSession, liveId))
     plyStat = pstat.LivePlayerStatus(statusXml)
@@ -123,7 +123,7 @@ def _main():
         sys.exit("[INFO] program: {0} {1}"
                  .format(liveId, plyStat.errcode))
 
-    # if --save-log is true, define logFile and write program data.
+    # If --save-log is true, define logFile and write program data.
     if parsedArgs.save_log is True:
         cview.mk_dir(confDict["logDir"])
         cview.mk_dir(os.path.join(confDict["logDir"],
@@ -145,7 +145,7 @@ def _main():
     else:
         logFile = None
 
-    # connect socket to comment-server.
+    # Connect socket to comment-server.
     # socket.close() is called by __exit__.
     with niconnect.MsgSocket() as msgSock:
         msgSock.connect(
@@ -154,9 +154,9 @@ def _main():
           plyStat.thread,
           log=logLimit)
 
-        # partial dom strings of <chat>
+        # Partial dom strings of <chat>
         partStr = None
-        # program status: False: onair / True: ended
+        # Program status: False: onair / True: ended
         isDisconnected = False
 
         while isDisconnected is False:
@@ -173,7 +173,7 @@ def _main():
                     cview.write_file(decdata, logFile)
 
                 if parsed["tag"] == "chat":
-                    # id user
+                    # ID users
                     if parsed["anonymity"] == "0":
                         tpl = cview.handle_chat(parsed,
                                                 confDict,
@@ -183,7 +183,7 @@ def _main():
                         if tpl[0] is True:
                             nameMapId = cview.load_json(
                                           confDict["p-nickNameId"])
-                    # anon
+                    # 184(anonymous) users
                     elif parsed["anonymity"] == "1":
                         tpl = cview.handle_chat(parsed,
                                                 confDict,
@@ -210,37 +210,37 @@ def parse_args(conf: dict) -> argparse.Namespace:
     defaultlimit = conf["logLimit"]
 
     argParser = argparse.ArgumentParser(description=__doc__, add_help=True)
-    # nicolive url.
+    # Nicolive url.
     #   lv[0-9]+ / co[0-9]+
     #   live/community page URL
     argParser.add_argument(
       "url",
       help="live/community URL",
       metavar="lv[XXXX]/co[XXXX]")
-    # logged in cookie.
+    # Logged in cookie.
     argParser.add_argument(
       "-c", "--cookie",
       help="specify cookie to use",
       default=pathtocookie)
-    # whether save log.
+    # Whether save log.
     argParser.add_argument(
       "-s", "--save-log",
       help="save comment log",
       action="store_true")
-    # past comment limit to acquire.
-    # dont use choices=range(0, 1001),
-    # cuz help becomes too verbose.
+    # Past comment limit to acquire.
+    # Don't use choices=range(0, 1001),
+    # help becomes too verbose.
     argParser.add_argument(
       "-l", "--limit",
       help="comment log to get [0-1000]",
       default=defaultlimit,
       type=int)
-    # use mute filtering.
+    # Use mute filtering.
     argParser.add_argument(
       "-f", "--use-filter",
       help="use mute filter",
       action="store_true")
-    # display in narrow mode.
+    # Display in narrow mode.
     argParser.add_argument(
       "-n", "--narrow",
       help="narrow mode",
