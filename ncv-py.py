@@ -187,6 +187,7 @@ def _main():
             rawdatas = msgSock.receive()
             for rawdata in rawdatas:
                 decdata = cview.decode_data(rawdata, partStr)
+                partStr = None
 
                 # To tell the data is partial or not,
                 # parse it before logging.
@@ -196,33 +197,35 @@ def _main():
                 elif parsed["tag"] != "partial":
                     cview.write_file(decdata, logFile)
 
-                if parsed["tag"] == "chat":
-                    # ID users
-                    if parsed["anonymity"] == "0":
-                        tpl = cview.handle_chat(parsed,
-                                                confDict,
-                                                nameMapId,
-                                                cmtFilter,
-                                                plyStat)
-                        if tpl[0] is True:
-                            nameMapId = cview.load_json(
-                                          confDict["p-nickNameId"])
-                    # 184(anonymous) users
-                    elif parsed["anonymity"] == "1":
-                        tpl = cview.handle_chat(parsed,
-                                                confDict,
-                                                nameMapAnon,
-                                                cmtFilter,
-                                                plyStat)
-                        if tpl[0] is True:
-                            nameMapAnon = cview.load_json(
-                                          confDict["p-nickNameAnon"])
-                    isDisconnected = tpl[1]
-                    partStr = None
-                elif parsed["tag"] == "thread":
-                    partStr = None
-                elif parsed["tag"] == "partial":
+                if parsed["tag"] == "thread":
+                    continue
+                if parsed["tag"] == "partial":
                     partStr = parsed["data"]
+                    continue
+
+                assert parsed["tag"] is "chat"
+                # ID users
+                if parsed["anonymity"] == "0":
+                    toReload = cview.name_handle(parsed,
+                                                 confDict,
+                                                 nameMapId)
+                    if toReload is True:
+                        nameMapId = cview.load_json(
+                                      confDict["p-nickNameId"])
+                # 184(anonymous) users
+                elif parsed["anonymity"] == "1":
+                    toReload = cview.name_handle(parsed,
+                                                 confDict,
+                                                 nameMapAnon)
+                    if toReload is True:
+                        nameMapAnon = cview.load_json(
+                                        confDict["p-nickNameAnon"])
+
+                cview.show(parsed, confDict, cmtFilter, plyStat)
+
+                # Break when "/disconnect" is sent by admin/broadcaster.
+                isDisconnected = all([parsed["content"] == "/disconnect",
+                                      int(parsed["premium"]) > 1])
 
     print("Program ended.")
 

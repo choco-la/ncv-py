@@ -120,25 +120,21 @@ def decode_data(raw: bytes, partial: str=None) -> str:
     return decdata
 
 
-def handle_chat(parsed: dict,
+def name_handle(parsed: dict,
                 confdict: dict,
-                namemap: dict,
-                filter,
-                plystat) -> Tuple[bool, bool]:
-    """Main chat-handling.
+                namemap: dict) -> bool:
+    """Nickname handling.
 
-    Clean later. Too huge.
+    Check if nickname needs registered,
+    namemap needs reloaded.
 
     Arguments:
         parsed: A parsed dict of a chat data.
-        confDict: The configuration dict.
+        confdict: The configuration dict.
         namemap: The generated nickname list from a json.
-        filter: A filtering instance that has a matching method.
-        plystat: An instance of the getplayerstatus.xml properties.
 
     Returns:
-        A boolean value tuple, first is "whether to reload the namemap.",
-        second is "whether the program is ended."
+        A boolean value "whether to reload the namemap".
     """
     toregist = to_regist(parsed["content"], parsed["id"], namemap)
     toreload = False
@@ -200,34 +196,45 @@ def handle_chat(parsed: dict,
     elif isnew is False:
         pass
 
+    return toreload
+
+
+def show(parsed: dict,
+         confdict: dict,
+         mutefilter: genfilter.MatchFilter,
+         plystat: pstat.LivePlayerStatus) -> None:
+    """Show comment.
+
+    Arguments:
+        parsed: A parsed dict of a chat data.
+        confdict: The configuration dict.
+        mutefilter: A filtering instance that has a matching method.
+        plystat: An instance of the getplayerstatus.xml properties.
+
+    Returns:
+        None
+    """
     parsed["nickname"], wchar = trunc_name(
                                   parsed["nickname"],
                                   confdict["nameLength"])
     parsed["cmttime"] = calc_rel_time(
-                           int(parsed["time"]),
-                           plystat.start)
+                          int(parsed["time"]),
+                          plystat.start)
     parsed["namelen"] = confdict["nameLength"]
 
-    if filter is None:
+    if mutefilter is None:
         tomute = False
     else:
         tomute = all([confdict["use_cmt_filter"],
-                      filter.ismatch(parsed["content"])])
+                      mutefilter.ismatch(parsed["content"])])
 
     if tomute:
-        pass
-    else:
-        if confdict["narrow"] is False:
-            show_comment(parsed, wchar)
-        elif confdict["narrow"] is True:
-            narrow_comment(parsed, wchar)
+        return
 
-    # Break when /disconnect is sent by admin/broadcaster.
-    # If all() returns True, isDisconnected becomes False.
-    isdisconnected = all([parsed["content"] == "/disconnect",
-                          int(parsed["premium"]) > 1])
-
-    return (toreload, isdisconnected)
+    if confdict["narrow"] is False:
+        show_comment(parsed, wchar)
+    elif confdict["narrow"] is True:
+        narrow_comment(parsed, wchar)
 
 
 def show_comment(parsed: dict, wchar: int) -> None:
