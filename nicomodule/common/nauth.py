@@ -14,11 +14,16 @@ import re
 
 def _main():
     cookieDir = os.path.join("cookie", "")
+    try:
+        os.makedirs(cookieDir, exist_ok=True)
+    except IOError as err:
+        sys.exit("[ERR] {0}: Cannot access.".format(cookieDir))
+
     cookieFile = "cookie.txt"
     pathToCookie = os.path.join(cookieDir, cookieFile)
 
     loginUrl = "https://account.nicovideo.jp/api/v1/login"
-    postData = urlencode(input_auth()).encode("utf-8")
+    postData = input_auth()
 
     save_cookie(loginUrl, postData, pathToCookie)
 
@@ -38,10 +43,10 @@ def input_auth() -> dict:
     password = ""
 
     while not is_valid_email(mail):
-        mail = input("E-Mail >>")
+        mail = input("E-Mail >>").strip()
 
     while len(password) <= 0:
-        password = getpass("Password >>")
+        password = getpass("Password >>").strip()
 
     return {"mail": mail, "password": password}
 
