@@ -9,10 +9,8 @@ import argparse
 from json import JSONDecodeError
 
 from nicomodule.common import (genfilter,
-                               nicookie,
                                nicoid,
-                               nickname,
-                               nauth)
+                               nickname)
 from nicomodule.live import (cparser,
                              niconnect,
                              pstat)
