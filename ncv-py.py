@@ -15,10 +15,8 @@ from nicomodule.live import (cparser,
                              niconnect,
                              pstat)
 from nicomodule.app import cview
-from typing import (Dict, Union)
-
-
-ConfProp = Union[str, int, bool]
+from typing import Dict
+from nicomodule.app.deftypes import ConfProp
 
 
 def _main():

@@ -13,16 +13,10 @@ import json
 
 from nicomodule.common import (genfilter,
                                nicookie,
-                               nicoid,
                                nickname,
                                nauth)
-from nicomodule.live import (cparser,
-                             niconnect,
-                             pstat)
-
-
-ConfProp = Union[str, int, bool]
-NameProp = Union[str, int]
+from nicomodule.live import pstat
+from .deftypes import (ConfProp, NameProp)
 
 
 def pull_usersession(cookie: str) -> str:
