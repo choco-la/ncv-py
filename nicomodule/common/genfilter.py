@@ -32,6 +32,10 @@ class MatchFilter():
         self.__wordlist = self.gen_word_list(filepath)
         self.__regexlist = self.gen_reg_list(self.__wordlist)
 
+    @property
+    def re_list(self) -> List[Pattern]:
+        return self.__regexlist
+
     def gen_word_list(self, filepath: str) -> List[str]:
         """Generate filtering word list.
 
@@ -77,9 +81,6 @@ class MatchFilter():
             else:
                 reglist.append(regex)
         return reglist
-
-    def get_re_list(self) -> List[Pattern]:
-        return self.__regexlist
 
     def ismatch(self, text: str) -> bool:
         """Check text matchs regex.
