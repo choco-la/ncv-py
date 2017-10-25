@@ -140,14 +140,13 @@ def name_handle(parsed: Dict[str, str],
     Returns:
         A boolean value "whether to reload the namemap".
     """
-    toregist = to_regist(parsed["content"], parsed["id"], namemap)
-    toreload = False
+    reload = False
 
-    if toregist:
+    if should_register(parsed["content"], parsed["id"], namemap):
         registname = re.search(r"[@＠](.+)$", parsed["content"]).group(1)
         try:
             if parsed["anonymity"] == "0":
-                nickname.regist_nickname(
+                nickname.register_name(
                   parsed["id"],
                   registname,
                   parsed["time"],
@@ -156,7 +155,7 @@ def name_handle(parsed: Dict[str, str],
                 namemap = load_json(
                             confdict["p-nickNameId"])
             elif parsed["anonymity"] == "1":
-                nickname.regist_nickname(
+                nickname.register_name(
                   parsed["id"],
                   registname,
                   parsed["time"],
@@ -164,7 +163,7 @@ def name_handle(parsed: Dict[str, str],
                 # Reload namemap.
                 namemap = load_json(
                             confdict["p-nickNameAnon"])
-            toreload = True
+            reload = True
         except json.JSONDecodeError as err:
             error_exit(err,
                        confdict["p-nickNameId"])
@@ -186,21 +185,21 @@ def name_handle(parsed: Dict[str, str],
                                   namemap)
 
     if isnew is True:
-        toreload = True
+        reload = True
         if parsed["anonymity"] == "0":
-            nickname.regist_nickname(parsed["id"],
-                                     parsed["nickname"],
-                                     parsed["time"],
-                                     confdict["p-nickNameId"])
+            nickname.register_name(parsed["id"],
+                                   parsed["nickname"],
+                                   parsed["time"],
+                                   confdict["p-nickNameId"])
         elif parsed["anonymity"] == "1":
-            nickname.regist_nickname(parsed["id"],
-                                     parsed["nickname"],
-                                     parsed["time"],
-                                     confdict["p-nickNameAnon"])
+            nickname.register_name(parsed["id"],
+                                   parsed["nickname"],
+                                   parsed["time"],
+                                   confdict["p-nickNameAnon"])
     elif isnew is False:
         pass
 
-    return toreload
+    return reload
 
 
 def show(parsed: Dict[str, str],
@@ -366,7 +365,7 @@ def load_json(filepath: str) -> Dict[int, NameProp]:
     return namemap
 
 
-def to_regist(text: str, uid: str, namemap: Dict[int, NameProp]) -> bool:
+def should_register(text: str, uid: str, namemap: Dict[int, NameProp]) -> bool:
     """Check if the name should be registered.
 
     If text contains "@|＠", treat after it as a new nickname.

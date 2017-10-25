@@ -186,9 +186,9 @@ def _main():
         isDisconnected = False
 
         while isDisconnected is False:
-            rawdatas = msgSock.receive()
-            for rawdata in rawdatas:
-                decdata = cview.decode_data(rawdata, partStr)
+            rawdata = msgSock.receive()
+            for rawdatum in rawdata:
+                decdata = cview.decode_data(rawdatum, partStr)
                 partStr = None
 
                 # To tell the data is partial or not,

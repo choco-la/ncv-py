@@ -12,10 +12,10 @@ from xml.dom import minidom
 from time import sleep
 
 
-def regist_nickname(id: str,
-                    name: str,
-                    time: int,
-                    filepath: str) -> None:
+def register_name(id: str,
+                  name: str,
+                  time: int,
+                  filepath: str) -> None:
     """Resister nickname to a json file.
 
     Dump dict of nicknames, registered time and
