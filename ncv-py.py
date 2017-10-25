@@ -15,6 +15,10 @@ from nicomodule.live import (cparser,
                              niconnect,
                              pstat)
 from nicomodule.app import cview
+from typing import (Dict, Union)
+
+
+ConfProp = Union[str, int, bool]
 
 
 def _main():
@@ -228,7 +232,7 @@ def _main():
     print("Program ended.")
 
 
-def parse_args(conf: dict) -> argparse.Namespace:
+def parse_args(conf: Dict[str, ConfProp]) -> argparse.Namespace:
     pathtocookie = os.path.join(conf["cookieDir"],
                                 conf["cookieFile"])
     # 0 ~ 1000

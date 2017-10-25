@@ -7,7 +7,7 @@ Load from the parent directory.
 import sys
 import re
 import os
-from typing import Tuple
+from typing import (Tuple, Dict, Union)
 import unicodedata
 import json
 
@@ -19,6 +19,10 @@ from nicomodule.common import (genfilter,
 from nicomodule.live import (cparser,
                              niconnect,
                              pstat)
+
+
+ConfProp = Union[str, int, bool]
+NameProp = Union[str, int]
 
 
 def pull_usersession(cookie: str) -> str:
@@ -120,9 +124,9 @@ def decode_data(raw: bytes, partial: str=None) -> str:
     return decdata
 
 
-def name_handle(parsed: dict,
-                confdict: dict,
-                namemap: dict) -> bool:
+def name_handle(parsed: Dict[str, str],
+                confdict: Dict[str, ConfProp],
+                namemap: Dict[int, NameProp]) -> bool:
     """Nickname handling.
 
     Check if nickname needs registered,
@@ -199,8 +203,8 @@ def name_handle(parsed: dict,
     return toreload
 
 
-def show(parsed: dict,
-         confdict: dict,
+def show(parsed: Dict[str, str],
+         confdict: Dict[str, ConfProp],
          mutefilter: genfilter.MatchFilter,
          plystat: pstat.LivePlayerStatus) -> None:
     """Show comment.
@@ -237,7 +241,7 @@ def show(parsed: dict,
         narrow_comment(parsed, wchar)
 
 
-def show_comment(parsed: dict, wchar: int) -> None:
+def show_comment(parsed: Dict[str, str], wchar: int) -> None:
     """Print a comment data by formatting.
 
     Print a comments with some additional info.
@@ -281,7 +285,7 @@ def show_comment(parsed: dict, wchar: int) -> None:
     print_color(fullcmt, color)
 
 
-def narrow_comment(parsed: dict, wchar: int) -> None:
+def narrow_comment(parsed: Dict[str, str], wchar: int) -> None:
     """Print a comment data by narrow formatting.
 
     Print a comments with some additional info.
@@ -336,7 +340,7 @@ def narrow_comment(parsed: dict, wchar: int) -> None:
     print_color(fullcmt, color)
 
 
-def load_json(filepath: str) -> dict:
+def load_json(filepath: str) -> Dict[int, NameProp]:
     """Load a nickname json file.
 
     Loading a json, make it to the dict object.
@@ -362,7 +366,7 @@ def load_json(filepath: str) -> dict:
     return namemap
 
 
-def to_regist(text: str, uid: str, namemap: dict) -> bool:
+def to_regist(text: str, uid: str, namemap: Dict[int, NameProp]) -> bool:
     """Check if the name should be registered.
 
     If text contains "@|＠", treat after it as a new nickname.
@@ -398,7 +402,7 @@ def to_regist(text: str, uid: str, namemap: dict) -> bool:
 
 def assign_nickname(uid: str,
                     isanon: str,
-                    namemap: dict) -> Tuple[str, bool]:
+                    namemap: Dict[int, NameProp]) -> Tuple[str, bool]:
     """Assign the nickanme to userID.
 
     Assign the nickname to the userID if already registered.

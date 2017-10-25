@@ -3,6 +3,7 @@
 """Connect to the comment server."""
 
 import socket
+from typing import List
 
 
 class MsgSocket():
@@ -55,7 +56,7 @@ class MsgSocket():
 
         return self.__msgsock
 
-    def receive(self, buffer: int=4096) -> list:
+    def receive(self, buffer: int=4096) -> List[bytes]:
         """Recieve comment data.
 
         Recieve comment data from socket.

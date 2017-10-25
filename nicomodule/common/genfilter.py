@@ -3,6 +3,7 @@
 """Generate regex filtering dict."""
 
 import re
+from typing import (List, Pattern)
 
 
 class MatchFilter():
@@ -31,7 +32,7 @@ class MatchFilter():
         self.__wordlist = self.gen_word_list(filepath)
         self.__regexlist = self.gen_reg_list(self.__wordlist)
 
-    def gen_word_list(self, filepath: str) -> list:
+    def gen_word_list(self, filepath: str) -> List[str]:
         """Generate filtering word list.
 
         Generate list object from text file.
@@ -52,7 +53,7 @@ class MatchFilter():
                 wordlist.append(word.strip())
         return wordlist
 
-    def gen_reg_list(self, words: list) -> list:
+    def gen_reg_list(self, words: List[str]) -> List[Pattern]:
         """Generate filtering compiled regex list.
 
         Generate list object from words list.
@@ -77,7 +78,7 @@ class MatchFilter():
                 reglist.append(regex)
         return reglist
 
-    def get_re_list(self) -> list:
+    def get_re_list(self) -> List[Pattern]:
         return self.__regexlist
 
     def ismatch(self, text: str) -> bool:

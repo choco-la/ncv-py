@@ -10,6 +10,7 @@ import sys
 import os
 from getpass import getpass
 import re
+from typing import Dict
 
 
 def _main():
@@ -28,7 +29,7 @@ def _main():
     save_cookie(loginUrl, postData, pathToCookie)
 
 
-def input_auth() -> dict:
+def input_auth() -> Dict[str, str]:
     """Input informations for the authentication.
 
     Input username/e-mail and password for login.
@@ -71,7 +72,7 @@ def is_valid_email(text: str) -> bool:
     return bool(re.match(email, text))
 
 
-def save_cookie(url: str, data: dict, cookie: str) -> None:
+def save_cookie(url: str, data: Dict[str, str], cookie: str) -> None:
     """Save cookie to file.
 
     Save loged in cookie to local file

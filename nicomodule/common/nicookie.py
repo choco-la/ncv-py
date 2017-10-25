@@ -28,7 +28,7 @@ def _main():
             print("{0}: {1}".format(cookie, nicoUserSess))
 
 
-def _show_usage():
+def _show_usage() -> None:
     print("Usage: {} [COOKIE]".format(__file__), file=sys.stderr)
 
 

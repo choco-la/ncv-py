@@ -4,9 +4,10 @@
 
 from xml.dom import minidom
 import xml.parsers.expat
+from typing import Dict
 
 
-def parse_comment(dom: str) -> dict:
+def parse_comment(dom: str) -> Dict[str, str]:
     """Parse comment tag.
 
     Parse comment tag to dict.
