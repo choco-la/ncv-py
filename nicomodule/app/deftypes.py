@@ -3,6 +3,7 @@
 """Types for type hints."""
 
 
-from typing import Union
-ConfProp = Union[str, int, bool]
-NameProp = Union[str, int]
+from typing import (Dict, Union)
+
+
+NameProp = Dict[str, Union[str, int]]

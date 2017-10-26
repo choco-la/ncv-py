@@ -55,7 +55,7 @@ def parse_comment(dom: str) -> Dict[str, str]:
         except KeyError as err:
             commentno = "-"
 
-        time = chat.attributes["date"].value
+        time = str(chat.attributes["date"].value)
         userid = chat.attributes["user_id"].value
 
         # Free members don't have premium key.

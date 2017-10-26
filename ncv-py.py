@@ -16,46 +16,25 @@ from nicomodule.live import (cparser,
                              pstat)
 from nicomodule.app import cview
 from typing import Dict
-from nicomodule.app.deftypes import ConfProp
 
 
 def _main():
-    # Initial configurations.
-    confDict = {
-        "cookieDir": os.path.join("cookie", ""),
-        "filterDir": os.path.join("filter", ""),
-        "logDir": os.path.join("log", ""),
-        "cookieFile": "cookie.txt",
-        "muteReCmt": "mute-re-comment.txt",
-        "nickNameId": "nickname-id.txt",
-        "nickNameAnon": "nickname-anon.txt",
-        "use_cmt_filter": False,
-        "logLimit": 20,
-        "nameLength": 12,
-        "narrow": False
-    }
-    # Path to file.
-    confDict["p-muteReCmt"] = os.path.join(confDict["filterDir"],
-                                           confDict["muteReCmt"])
-    confDict["p-nickNameId"] = os.path.join(confDict["filterDir"],
-                                            confDict["nickNameId"])
-    confDict["p-nickNameAnon"] = os.path.join(confDict["filterDir"],
-                                              confDict["nickNameAnon"])
+    conf = cview.Config()
 
-    cview.mk_dir(confDict["cookieDir"])
-    cview.mk_dir(confDict["filterDir"])
-    nickname.touch_json(confDict["p-nickNameId"])
-    nickname.touch_json(confDict["p-nickNameAnon"])
-    nameMapId = cview.load_json(confDict["p-nickNameId"])
-    nameMapAnon = cview.load_json(confDict["p-nickNameAnon"])
+    cview.mk_dir(conf.cookieDir)
+    cview.mk_dir(conf.filterDir)
+    nickname.touch_json(conf.nickNameId)
+    nickname.touch_json(conf.nickNameAnon)
+    nameMapId = cview.load_json(conf.nickNameId)
+    nameMapAnon = cview.load_json(conf.nickNameAnon)
 
-    parsedArgs = parse_args(confDict)
+    parsedArgs = parse_args(conf)
 
     # If narrow option is explicited or configured, True.
-    if confDict["narrow"] is True:
+    if conf.narrow is True:
         pass
-    elif confDict["narrow"] is False:
-        confDict["narrow"] = parsedArgs.narrow
+    elif conf.narrow is False:
+        conf.narrow = parsedArgs.narrow
 
     """
     TODO: clean arround mute toggle.
@@ -69,27 +48,27 @@ def _main():
     """
     if parsedArgs.use_filter is True:
         try:
-            cmtFilter = (genfilter.MatchFilter(confDict["p-muteReCmt"]))
-            confDict["use_cmt_filter"] = True
+            cmtFilter = (genfilter.MatchFilter(conf.muteReCmt))
+            conf.use_cmt_filter = True
         # Disable comment filtering if any errors occurred.
         except IOError as err:
             print("[ERR] {0}: comment filter disabled."
-                  .format(confDict["p-muteReCmt"]),
+                  .format(conf.muteReCmt),
                   file=sys.stderr)
             cmtFilter = None
-            confDict["use_cmt_filter"] = False
+            conf.use_cmt_filter = False
     elif parsedArgs.use_filter is False:
-        if confDict["use_cmt_filter"] is True:
+        if conf.use_cmt_filter is True:
             try:
-                cmtFilter = (genfilter.MatchFilter(confDict["p-muteReCmt"]))
+                cmtFilter = (genfilter.MatchFilter(conf.muteReCmt))
             # Disable comment filtering if any errors occurred.
             except IOError as err:
                 print("[ERR] {0}: comment filter disabled."
-                      .format(confDict["p-muteReCmt"]),
+                      .format(conf.muteReCmt),
                       file=sys.stderr)
                 cmtFilter = None
-                confDict["use_cmt_filter"] = False
-        elif confDict["use_cmt_filter"] is False:
+                conf.use_cmt_filter = False
+        elif conf.use_cmt_filter is False:
             cmtFilter = None
 
     if os.path.basename(parsedArgs.url) != "getplayerstatus.xml":
@@ -149,11 +128,11 @@ def _main():
 
     # If --save-log is true, define logFile and write program data.
     if parsedArgs.save_log is True:
-        cview.mk_dir(confDict["logDir"])
-        cview.mk_dir(os.path.join(confDict["logDir"],
+        cview.mk_dir(conf.logDir)
+        cview.mk_dir(os.path.join(conf.logDir,
                                   plyStat.community + ""))
 
-        logFile = os.path.join(confDict["logDir"],
+        logFile = os.path.join(conf.logDir,
                                plyStat.community,
                                plyStat.lvid + ".txt")
         cview.write_file(
@@ -207,21 +186,21 @@ def _main():
                 # ID users
                 if parsed["anonymity"] == "0":
                     toReload = cview.name_handle(parsed,
-                                                 confDict,
+                                                 conf,
                                                  nameMapId)
                     if toReload is True:
                         nameMapId = cview.load_json(
-                                      confDict["p-nickNameId"])
+                                      conf.nickNameId)
                 # 184(anonymous) users
                 elif parsed["anonymity"] == "1":
                     toReload = cview.name_handle(parsed,
-                                                 confDict,
+                                                 conf,
                                                  nameMapAnon)
                     if toReload is True:
                         nameMapAnon = cview.load_json(
-                                        confDict["p-nickNameAnon"])
+                                        conf.nickNameAnon)
 
-                cview.show(parsed, confDict, cmtFilter, plyStat)
+                cview.show(parsed, conf, cmtFilter, plyStat)
 
                 # Break when "/disconnect" is sent by admin/broadcaster.
                 isDisconnected = all([parsed["content"] == "/disconnect",
@@ -230,11 +209,9 @@ def _main():
     print("Program ended.")
 
 
-def parse_args(conf: Dict[str, ConfProp]) -> argparse.Namespace:
-    pathtocookie = os.path.join(conf["cookieDir"],
-                                conf["cookieFile"])
+def parse_args(conf: cview.Config) -> argparse.Namespace:
     # 0 ~ 1000
-    defaultlimit = conf["logLimit"]
+    defaultlimit = conf.logLimit
 
     argParser = argparse.ArgumentParser(description=__doc__, add_help=True)
     # Nicolive url.
@@ -248,7 +225,7 @@ def parse_args(conf: Dict[str, ConfProp]) -> argparse.Namespace:
     argParser.add_argument(
       "-c", "--cookie",
       help="specify cookie to use",
-      default=pathtocookie)
+      default=conf.cookieFile)
     # Whether save log.
     argParser.add_argument(
       "-s", "--save-log",

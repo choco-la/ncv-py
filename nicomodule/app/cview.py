@@ -7,7 +7,7 @@ Load from the parent directory.
 import sys
 import re
 import os
-from typing import (Tuple, Dict, Union)
+from typing import (Tuple, Dict, Union, cast)
 import unicodedata
 import json
 
@@ -16,7 +16,26 @@ from nicomodule.common import (genfilter,
                                nickname,
                                nauth)
 from nicomodule.live import pstat
-from .deftypes import (ConfProp, NameProp)
+from .deftypes import NameProp
+
+
+class Config():
+    def __init__(self) -> None:
+        self.cookieDir = os.path.join("cookie", "")
+        self.filterDir = os.path.join("filter", "")
+        self.logDir = os.path.join("log", "")
+        self.cookieFile = os.path.join(self.cookieDir,
+                                       "cookie.txt")
+        self.muteReCmt = os.path.join(self.filterDir,
+                                      "mute-re-comment.txt")
+        self.nickNameId = os.path.join(self.filterDir,
+                                       "nickname-id.txt")
+        self.nickNameAnon = os.path.join(self.filterDir,
+                                         "nickname-anon.txt")
+        self.use_cmt_filter = False
+        self.logLimit = 20
+        self.nameLength = 12
+        self.narrow = False
 
 
 def pull_usersession(cookie: str) -> str:
@@ -119,8 +138,8 @@ def decode_data(raw: bytes, partial: str=None) -> str:
 
 
 def name_handle(parsed: Dict[str, str],
-                confdict: Dict[str, ConfProp],
-                namemap: Dict[int, NameProp]) -> bool:
+                conf: Config,
+                namemap: Dict[str, NameProp]) -> bool:
     """Nickname handling.
 
     Check if nickname needs registered,
@@ -128,7 +147,7 @@ def name_handle(parsed: Dict[str, str],
 
     Arguments:
         parsed: A parsed dict of a chat data.
-        confdict: The configuration dict.
+        conf: The configuration instance.
         namemap: The generated nickname list from a json.
 
     Returns:
@@ -143,33 +162,33 @@ def name_handle(parsed: Dict[str, str],
                 nickname.register_name(
                   parsed["id"],
                   registname,
-                  parsed["time"],
-                  confdict["p-nickNameId"])
+                  int(parsed["time"]),
+                  conf.nickNameId)
                 # Reload namemap.
                 namemap = load_json(
-                            confdict["p-nickNameId"])
+                            conf.nickNameId)
             elif parsed["anonymity"] == "1":
                 nickname.register_name(
                   parsed["id"],
                   registname,
-                  parsed["time"],
-                  confdict["p-nickNameAnon"])
+                  int(parsed["time"]),
+                  conf.nickNameAnon)
                 # Reload namemap.
                 namemap = load_json(
-                            confdict["p-nickNameAnon"])
+                            conf.nickNameAnon)
             reload = True
         except json.JSONDecodeError as err:
             error_exit(err,
-                       confdict["p-nickNameId"])
+                       conf.nickNameId)
         except IOError as err:
             error_exit(err,
-                       confdict["p-nickNameId"])
+                       conf.nickNameId)
         except IsADirectoryError as err:
             error_exit(err,
-                       confdict["p-nickNameId"])
+                       conf.nickNameId)
         except PermissionError as err:
             error_exit(err,
-                       confdict["p-nickNameId"])
+                       conf.nickNameId)
     else:
         pass
 
@@ -183,13 +202,13 @@ def name_handle(parsed: Dict[str, str],
         if parsed["anonymity"] == "0":
             nickname.register_name(parsed["id"],
                                    parsed["nickname"],
-                                   parsed["time"],
-                                   confdict["p-nickNameId"])
+                                   int(parsed["time"]),
+                                   conf.nickNameId)
         elif parsed["anonymity"] == "1":
             nickname.register_name(parsed["id"],
                                    parsed["nickname"],
-                                   parsed["time"],
-                                   confdict["p-nickNameAnon"])
+                                   int(parsed["time"]),
+                                   conf.nickNameAnon)
     elif isnew is False:
         pass
 
@@ -197,14 +216,14 @@ def name_handle(parsed: Dict[str, str],
 
 
 def show(parsed: Dict[str, str],
-         confdict: Dict[str, ConfProp],
+         conf: Config,
          mutefilter: genfilter.MatchFilter,
          plystat: pstat.LivePlayerStatus) -> None:
     """Show comment.
 
     Arguments:
         parsed: A parsed dict of a chat data.
-        confdict: The configuration dict.
+        conf: The configuration instance.
         mutefilter: A filtering instance that has a matching method.
         plystat: An instance of the getplayerstatus.xml properties.
 
@@ -213,24 +232,24 @@ def show(parsed: Dict[str, str],
     """
     parsed["nickname"], wchar = trunc_name(
                                   parsed["nickname"],
-                                  confdict["nameLength"])
+                                  conf.nameLength)
     parsed["cmttime"] = calc_rel_time(
                           int(parsed["time"]),
                           plystat.start)
-    parsed["namelen"] = confdict["nameLength"]
+    parsed["namelen"] = str(conf.nameLength)
 
     if mutefilter is None:
         tomute = False
     else:
-        tomute = all([confdict["use_cmt_filter"],
+        tomute = all([conf.use_cmt_filter,
                       mutefilter.ismatch(parsed["content"])])
 
     if tomute:
         return
 
-    if confdict["narrow"] is False:
+    if conf.narrow is False:
         show_comment(parsed, wchar)
-    elif confdict["narrow"] is True:
+    elif conf.narrow is True:
         narrow_comment(parsed, wchar)
 
 
@@ -267,7 +286,7 @@ def show_comment(parsed: Dict[str, str], wchar: int) -> None:
         color = "default"
 
     # Truncate display name to configured length.
-    namearea = "[{2: ^" + str(parsed["namelen"] - wchar) + "}]"
+    namearea = "[{2: ^" + str(int(parsed["namelen"]) - wchar) + "}]"
     fullcmt = (("{0}:{1}" + namearea + " {3} [{4}]")
                .format(parsed["no"],
                        pmark,
@@ -333,7 +352,7 @@ def narrow_comment(parsed: Dict[str, str], wchar: int) -> None:
     print_color(fullcmt, color)
 
 
-def load_json(filepath: str) -> Dict[int, NameProp]:
+def load_json(filepath: str) -> Dict[str, NameProp]:
     """Load a nickname json file.
 
     Loading a json, make it to the dict object.
@@ -359,7 +378,7 @@ def load_json(filepath: str) -> Dict[int, NameProp]:
     return namemap
 
 
-def should_register(text: str, uid: str, namemap: Dict[int, NameProp]) -> bool:
+def should_register(text: str, uid: str, namemap: Dict[str, NameProp]) -> bool:
     """Check if the name should be registered.
 
     If text contains "@|＠", treat after it as a new nickname.
@@ -389,13 +408,13 @@ def should_register(text: str, uid: str, namemap: Dict[int, NameProp]) -> bool:
             return False
         elif prop["fixed"] == 0:
             return True
-    else:
-        return False
+
+    return False
 
 
 def assign_nickname(uid: str,
                     isanon: str,
-                    namemap: Dict[int, NameProp]) -> Tuple[str, bool]:
+                    namemap: Dict[str, NameProp]) -> Tuple[str, bool]:
     """Assign the nickanme to userID.
 
     Assign the nickname to the userID if already registered.
@@ -413,7 +432,8 @@ def assign_nickname(uid: str,
     """
     # Return name if already registered.
     try:
-        return (namemap[uid]["name"], False)
+        nameprop = namemap[uid]["name"]
+        return (cast(str, nameprop), False)
     except KeyError as err:
         pass
 
@@ -425,6 +445,8 @@ def assign_nickname(uid: str,
             return (uid, False)
     elif isanon == "1":
         return (uid, False)
+
+    return (uid, False)
 
 
 def trunc_name(orig: str, limit: int) -> Tuple[str, int]:
@@ -487,6 +509,8 @@ def get_chr_width(char: str) -> int:
         return 1
     elif re.match(r"A|F|N|W", width):
         return 2
+
+    return 1
 
 
 def print_color(text: str, color: str) -> None:

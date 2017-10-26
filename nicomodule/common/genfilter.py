@@ -98,10 +98,8 @@ class MatchFilter():
 
 if __name__ == "__main__":
     import sys
-    filter = MatchFilter(sys.argv[1])
-    wlist = gen_word_list()
-    rlist = gen_reg_list(wlist)
+    mutefilter = MatchFilter(sys.argv[1])
 
     for arg in sys.argv[2:]:
-        result = ismatch(arg, rlist)
+        result = mutefilter.ismatch(arg)
         print("{0}\t{1}".format(result, arg))
