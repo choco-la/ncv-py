@@ -3,3 +3,4 @@ cookie/*
 log/*
 filter/nickname-anon.txt
 filter/nickname-id.txt
+.mypy_cache
