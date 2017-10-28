@@ -8,7 +8,7 @@ import re
 import http.cookiejar
 
 
-def _main():
+def _main() -> None:
     if len(sys.argv) <= 1:
         _show_usage()
         exit(1)

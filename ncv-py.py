@@ -18,7 +18,7 @@ from nicomodule.app import cview
 from typing import Dict
 
 
-def _main():
+def _main() -> None:
     conf = cview.Config()
 
     cview.mk_dir(conf.cookieDir)
@@ -187,11 +187,24 @@ def _main():
                         nameMapAnon = cview.load_json(
                                         conf.nickNameAnon)
 
-                cview.show(parsed, conf, cmtFilter, plyStat)
-
                 # Break when "/disconnect" is sent by admin/broadcaster.
+                # Assign before mute.
                 isDisconnected = all([parsed["content"] == "/disconnect",
                                       int(parsed["premium"]) > 1])
+
+                muteConditions = [
+                    conf.use_cmt_filter,
+                    cmtFilter.ismatch(parsed["content"])
+                ]
+                if all(muteConditions):
+                        continue
+
+                if conf.narrow is False:
+                    cview.show_comment(parsed,
+                                       plyStat.start,
+                                       conf.nameLength)
+                elif conf.narrow is True:
+                    cview.narrow_comment(parsed, conf.nameLength)
 
     print("Program ended.")
 

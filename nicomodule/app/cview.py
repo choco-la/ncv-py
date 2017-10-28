@@ -11,31 +11,33 @@ from typing import (Tuple, Dict, Union, cast)
 import unicodedata
 import json
 
-from nicomodule.common import (genfilter,
-                               nicookie,
+from nicomodule.common import (nicookie,
                                nickname,
                                nauth)
-from nicomodule.live import pstat
 from .deftypes import NameProp
 
 
 class Config():
     def __init__(self) -> None:
-        self.cookieDir = os.path.join("cookie", "")
-        self.filterDir = os.path.join("filter", "")
-        self.logDir = os.path.join("log", "")
-        self.cookieFile = os.path.join(self.cookieDir,
-                                       "cookie.txt")
-        self.muteReCmt = os.path.join(self.filterDir,
-                                      "mute-re-comment.txt")
-        self.nickNameId = os.path.join(self.filterDir,
-                                       "nickname-id.txt")
-        self.nickNameAnon = os.path.join(self.filterDir,
-                                         "nickname-anon.txt")
-        self.use_cmt_filter = False
-        self.logLimit = 20
-        self.nameLength = 12
-        self.narrow = False
+        self.cookieDir = os.path.join("cookie", "")  # type: str
+        self.filterDir = os.path.join("filter", "")  # type: str
+        self.logDir = os.path.join("log", "")  # type: str
+        self.cookieFile = os.path.join(
+          self.cookieDir,
+          "cookie.txt")  # type: str
+        self.muteReCmt = os.path.join(
+          self.filterDir,
+          "mute-re-comment.txt")  # type: str
+        self.nickNameId = os.path.join(
+          self.filterDir,
+          "nickname-id.txt")  # type: str
+        self.nickNameAnon = os.path.join(
+          self.filterDir,
+          "nickname-anon.txt")  # type: str
+        self.use_cmt_filter = False  # type: bool
+        self.logLimit = 20  # type: int
+        self.nameLength = 12  # type: int
+        self.narrow = False  # type: bool
 
 
 def pull_usersession(cookie: str) -> str:
@@ -195,52 +197,17 @@ def name_handle(parsed: Dict[str, str],
     return reload
 
 
-def show(parsed: Dict[str, str],
-         conf: Config,
-         mutefilter: genfilter.MatchFilter,
-         plystat: pstat.LivePlayerStatus) -> None:
-    """Show comment.
-
-    Arguments:
-        parsed: A parsed dict of a chat data.
-        conf: The configuration instance.
-        mutefilter: A filtering instance that has a matching method.
-        plystat: An instance of the getplayerstatus.xml properties.
-
-    Returns:
-        None
-    """
-    parsed["nickname"], wchar = trunc_name(
-                                  parsed["nickname"],
-                                  conf.nameLength)
-    parsed["cmttime"] = calc_rel_time(
-                          int(parsed["time"]),
-                          plystat.start)
-    parsed["namelen"] = str(conf.nameLength)
-
-    if mutefilter is None:
-        tomute = False
-    else:
-        tomute = all([conf.use_cmt_filter,
-                      mutefilter.ismatch(parsed["content"])])
-
-    if tomute:
-        return
-
-    if conf.narrow is False:
-        show_comment(parsed, wchar)
-    elif conf.narrow is True:
-        narrow_comment(parsed, wchar)
-
-
-def show_comment(parsed: Dict[str, str], wchar: int) -> None:
+def show_comment(parsed: Dict[str, str],
+                 starttime: int,
+                 width: int) -> None:
     """Print a comment data by formatting.
 
     Print a comments with some additional info.
 
     Arguments:
         parsed: The parsed dict of a chat data.
-        wchar: A number of double width characters.
+        starttime: Tha UnixTime program starts.
+        width: The width of displaying name on console.
 
     Returns:
         None
@@ -266,18 +233,23 @@ def show_comment(parsed: Dict[str, str], wchar: int) -> None:
         color = "default"
 
     # Truncate display name to configured length.
-    namearea = "[{2: ^" + str(int(parsed["namelen"]) - wchar) + "}]"
+    nickname, wchar = trunc_name(parsed["nickname"], width)
+    namearea = "[{2: ^" + str(width - wchar) + "}]"
+    commenttime = calc_rel_time(
+                    int(parsed["time"]),
+                    starttime)
     fullcmt = (("{0}:{1}" + namearea + " {3} [{4}]")
                .format(parsed["no"],
                        pmark,
-                       parsed["nickname"],
+                       nickname,
                        parsed["content"],
-                       parsed["cmttime"]))
+                       commenttime))
 
     print_color(fullcmt, color)
 
 
-def narrow_comment(parsed: Dict[str, str], wchar: int) -> None:
+def narrow_comment(parsed: Dict[str, str],
+                   width: int) -> None:
     """Print a comment data by narrow formatting.
 
     Print a comments with some additional info.
@@ -285,7 +257,7 @@ def narrow_comment(parsed: Dict[str, str], wchar: int) -> None:
 
     Arguments:
         parsed: The parsed dict of a chat data.
-        wchar: A number of double width characters.
+        width: The width of displaying name on console.
 
     Returns:
         None
@@ -305,8 +277,10 @@ def narrow_comment(parsed: Dict[str, str], wchar: int) -> None:
     else:
         color = "default"
 
-    namearea = "[{0: ^" + str(8 - wchar) + "}]"
-    nname, _ = trunc_name(parsed["nickname"], 8)
+    width = int(width * 2 / 3)
+    nickname, wchar = trunc_name(parsed["nickname"], width)
+    namearea = "[{0: ^" + str(width - wchar) + "}]"
+    nname, _ = trunc_name(parsed["nickname"], width)
     # Which is better,
     # substrings re.sub([letter count], ...)
     # or
@@ -580,7 +554,7 @@ def write_file(text: str, filepath: str) -> None:
         error_exit(err, filepath)
 
 
-def error_exit(err, targ: str, *details: tuple) -> None:
+def error_exit(err: Exception, targ: str, *details: tuple) -> None:
     """Exit script with error message.
 
     Print error messages such a error line, error details,

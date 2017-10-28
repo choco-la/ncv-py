@@ -6,9 +6,10 @@ import sys
 from xml.dom import minidom
 import urllib
 from urllib import request
+from typing import Optional
 
 
-def _main():
+def _main() -> None:
     if len(sys.argv) > 1:
         xmlfile = sys.argv[1]
         with open(xmlfile, "r") as xmlopen:
@@ -30,7 +31,7 @@ def _main():
     print(str(statDict))
 
 
-def _show_usage():
+def _show_usage() -> None:
     print("Usage: {} getplayerstatus.xml".format(__file__), file=sys.stderr)
 
 
@@ -97,7 +98,7 @@ class LivePlayerStatus():
         try:
             errtag = body.getElementsByTagName("error")[0]
         except IndexError as err:
-            self.errcode = None
+            self.errcode = None  # type: Optional[str]
         else:
             self.errcode = (errtag.getElementsByTagName("code")[0]
                             .firstChild.data.strip())
@@ -105,51 +106,51 @@ class LivePlayerStatus():
 
         streamtag = body.getElementsByTagName("stream")[0]
         self.lvid = (streamtag.getElementsByTagName("id")[0]
-                     .firstChild.data.strip())
+                     .firstChild.data.strip())  # type: str
         self.title = (streamtag.getElementsByTagName("title")[0]
-                      .firstChild.data.strip())
+                      .firstChild.data.strip())  # type: str
         msstart = (streamtag.getElementsByTagName("start_time")[0]
                    .firstChild.data.strip())
-        self.start = int(msstart)
+        self.start = int(msstart)  # type: int
 
         # Official programs don't has default_community key.
         try:
             self.community = (streamtag.getElementsByTagName(
                                 "default_community")[0]
-                              .firstChild.data.strip())
+                              .firstChild.data.strip())  # type: str
         except AttributeError as err:
             self.community = "official"
 
         # Official programs don't has owner_name key.
         try:
             self.owner = (streamtag.getElementsByTagName("owner_name")[0]
-                          .firstChild.data.strip())
+                          .firstChild.data.strip())  # type: str
         except AttributeError as err:
             self.owner = "official"
 
         usertag = body.getElementsByTagName("user")[0]
         self.seetno = (usertag.getElementsByTagName("room_seetno")[0]
-                       .firstChild.data.strip())
+                       .firstChild.data.strip())  # type: str
 
         # Some official programs don't has rtmpurl key.
         rtmp = body.getElementsByTagName("rtmp")[0]
         try:
             self.rtmpurl = (rtmp.getElementsByTagName("url")[0]
-                            .firstChild.data.strip())
+                            .firstChild.data.strip())  # type: str
         except AttributeError as err:
             pass
         self.ticket = (rtmp.getElementsByTagName("ticket")[0]
-                       .firstChild.data.strip())
+                       .firstChild.data.strip())  # type: str
 
         mstag = body.getElementsByTagName("ms")[0]
         self.addr = (mstag.getElementsByTagName("addr")[0]
-                     .firstChild.data.strip())
+                     .firstChild.data.strip())  # type: str
         msport = (mstag.getElementsByTagName("port")[0]
                   .firstChild.data.strip())
-        self.port = int(msport)
+        self.port = int(msport)  # type: int
         msthread = (mstag.getElementsByTagName("thread")[0]
                     .firstChild.data.strip())
-        self.thread = int(msthread)
+        self.thread = int(msthread)  # type: int
 
 
 if __name__ == "__main__":

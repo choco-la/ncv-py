@@ -90,11 +90,11 @@ class MsgSocket():
         rawdata = self.receive()
         comments = []
         for rawdatum in rawdata:
+            decdata = rawdatum.decode("utf-8", "ignore")
             if partstr:
-                decdata = partstr + rawdatum.decode("utf-8")
+                decdata = partstr + decdata
                 partstr = None
-            else:
-                decdata = rawdatum.decode("utf-8")
+
             if decdata.endswith(">"):
                 comments.append(decdata)
             else:
@@ -121,5 +121,5 @@ class MsgSocket():
     def __enter__(self):
         return self
 
-    def __exit__(self, extype, exvalue, traceback):
+    def __exit__(self, extype, exvalue, traceback) -> None:
         self.close()

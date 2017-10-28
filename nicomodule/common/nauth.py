@@ -13,7 +13,7 @@ import re
 from typing import Dict
 
 
-def _main():
+def _main() -> None:
     cookieDir = os.path.join("cookie", "")
     try:
         os.makedirs(cookieDir, exist_ok=True)
