@@ -167,6 +167,7 @@ def _main() -> None:
                     cview.write_file(comment, logFile)
 
                 parsed = cparser.parse_comment(comment)
+
                 if parsed["tag"] == "thread":
                     continue
 
@@ -192,11 +193,12 @@ def _main() -> None:
                 isDisconnected = all([parsed["content"] == "/disconnect",
                                       int(parsed["premium"]) > 1])
 
-                muteConditions = [
+                checkCondition = [
                     conf.use_cmt_filter,
-                    cmtFilter.ismatch(parsed["content"])
+                    cmtFilter
                 ]
-                if all(muteConditions):
+                if all(checkCondition):
+                    if cmtFilter.ismatch(parsed["content"]):
                         continue
 
                 if conf.narrow is False:
