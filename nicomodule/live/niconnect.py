@@ -73,6 +73,40 @@ class MsgSocket():
         rawdata = self.__msgsock.recv(buffer).split(endbyte)
         return rawdata
 
+
+    def recv_comments(self, partstr: str=None) -> List[str]:
+        """Returns comment data.
+
+        Returns comment dom data recieved from socket.
+        If partial dom passed,
+        concatenate with recieved strings
+        (assert it also to be partial).
+
+        Argument:
+            partstr: A partial dom strings.
+
+        Returns:
+            List of comment dom strings.
+        """
+        rawdata = self.receive()
+        comments = []
+        for rawdatum in rawdata:
+            if partstr:
+                decdata = partstr + rawdatum.decode("utf-8")
+                partstr = None
+            else:
+                decdata = rawdatum.decode("utf-8")
+            if decdata.endswith(">"):
+                comments.append(decdata)
+            else:
+                partstr = decdata
+
+        if partstr:
+            comments += self.recv_comments(partstr)
+
+        return comments
+
+
     def close(self) -> None:
         """Close socket.
 

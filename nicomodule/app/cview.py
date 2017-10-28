@@ -117,26 +117,6 @@ def mk_dir(dir: str) -> None:
         error_exit(err, dir)
 
 
-def decode_data(raw: bytes, partial: str=None) -> str:
-    """Decode the data recieved from a socket.
-
-    Decode recieved chat data to UTF-8.
-    If a partial data argued, concatenate with the data.
-
-    Arguments:
-        raw: Thr raw data of a socket.
-        partial: None or a corrupt tag recieved previous loop.
-
-    Returns:
-        Decoded chat data strings.
-    """
-    if partial is None:
-        decdata = raw.decode("utf-8", "ignore")
-    else:
-        decdata = partial + raw.decode("utf-8", "ignore")
-    return decdata
-
-
 def name_handle(parsed: Dict[str, str],
                 conf: Config,
                 namemap: Dict[str, NameProp]) -> bool:

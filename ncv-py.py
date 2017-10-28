@@ -114,7 +114,7 @@ def _main():
             cview.error_exit(err, parsedArgs.url)
 
     # Check program status: ended/deleted/comingsoon.
-    if plyStat.errcode is not None:
+    if plyStat.errcode:
         sys.exit("[INFO] program: {0} {1}"
                  .format(liveId, plyStat.errcode))
 
@@ -157,29 +157,21 @@ def _main():
           plyStat.thread,
           log=logLimit)
 
-        # Partial dom strings of <chat>
-        partStr = None
+
         # Program status: False: onair / True: ended
         isDisconnected = False
 
         while isDisconnected is False:
-            rawdata = msgSock.receive()
-            for rawdatum in rawdata:
-                decdata = cview.decode_data(rawdatum, partStr)
-                partStr = None
+            comments = msgSock.recv_comments()
+            for comment in comments:
 
                 # To tell the data is partial or not,
                 # parse it before logging.
-                parsed = cparser.parse_comment(decdata)
-                if logFile is None:
-                    pass
-                elif parsed["tag"] != "partial":
-                    cview.write_file(decdata, logFile)
+                parsed = cparser.parse_comment(comment)
+                if logFile:
+                    cview.write_file(comment, logFile)
 
                 if parsed["tag"] == "thread":
-                    continue
-                if parsed["tag"] == "partial":
-                    partStr = parsed["data"]
                     continue
 
                 assert parsed["tag"] is "chat"
