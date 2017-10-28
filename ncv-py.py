@@ -157,24 +157,19 @@ def _main():
           plyStat.thread,
           log=logLimit)
 
-
         # Program status: False: onair / True: ended
         isDisconnected = False
 
         while isDisconnected is False:
             comments = msgSock.recv_comments()
             for comment in comments:
-
-                # To tell the data is partial or not,
-                # parse it before logging.
-                parsed = cparser.parse_comment(comment)
                 if logFile:
                     cview.write_file(comment, logFile)
 
+                parsed = cparser.parse_comment(comment)
                 if parsed["tag"] == "thread":
                     continue
 
-                assert parsed["tag"] is "chat"
                 # ID users
                 if parsed["anonymity"] == "0":
                     toReload = cview.name_handle(parsed,

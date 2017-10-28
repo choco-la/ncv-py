@@ -73,7 +73,6 @@ class MsgSocket():
         rawdata = self.__msgsock.recv(buffer).split(endbyte)
         return rawdata
 
-
     def recv_comments(self, partstr: str=None) -> List[str]:
         """Returns comment data.
 
@@ -105,7 +104,6 @@ class MsgSocket():
             comments += self.recv_comments(partstr)
 
         return comments
-
 
     def close(self) -> None:
         """Close socket.
