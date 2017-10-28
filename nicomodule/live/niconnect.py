@@ -95,7 +95,10 @@ class MsgSocket():
                 decdata = partstr + decdata
                 partstr = None
 
-            if decdata.endswith(">"):
+            if decdata.endswith("</chat>"):
+                comments.append(decdata)
+            # thread tag ends with "/>"
+            elif decdata.endswith("/>"):
                 comments.append(decdata)
             else:
                 partstr = decdata
