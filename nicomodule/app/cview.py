@@ -7,7 +7,7 @@ Load from the parent directory.
 import sys
 import re
 import os
-from typing import (Tuple, Dict, Union, cast)
+from typing import (Tuple, Dict, cast)
 import unicodedata
 import json
 
@@ -423,7 +423,7 @@ def trunc_name(orig: str, limit: int) -> Tuple[str, int]:
     # Truncated name.
     trunc = ""
 
-    for char in list(orig):
+    for char in orig:
         # 1 or 2 width acceptable.
         if width < limit - 1:
             trunc += char
@@ -458,10 +458,12 @@ def get_chr_width(char: str) -> int:
         1 or 2.
         In case it is ascii, return 1.
     """
+    single = ("H", "Na")
+    double = ("A", "F", "N", "W")
     width = unicodedata.east_asian_width(char)
-    if re.match(r"H|Na", width):
+    if width in single:
         return 1
-    elif re.match(r"A|F|N|W", width):
+    elif width in double:
         return 2
 
     return 1
@@ -480,26 +482,25 @@ def print_color(text: str, color: str) -> None:
     Returns:
         None
     """
-    if color == "red":
-        print("\033[31m" + text + "\033[0m")
-    elif color == "darkgreen":
-        print("\033[32m" + text + "\033[0m")
-    elif color == "darkpurple":
-        print("\033[35m" + text + "\033[0m")
-    elif color == "orange":
-        print("\033[91m" + text + "\033[0m")
-    elif color == "green":
-        print("\033[92m" + text + "\033[0m")
-    elif color == "yellow":
-        print("\033[93m" + text + "\033[0m")
-    elif color == "blue":
-        print("\033[94m" + text + "\033[0m")
-    elif color == "purple":
-        print("\033[95m" + text + "\033[0m")
-    elif color == "sky":
-        print("\033[96m" + text + "\033[0m")
-    else:
+    color = color.lower()
+    colordict = {
+        "red": "31",
+        "darkgreen": "32",
+        "darkpurple": "35",
+        "orange": "91",
+        "green": "92",
+        "yellow": "93",
+        "blue": "94",
+        "purple": "95",
+        "sky": "96"
+    }
+    if color not in colordict.keys():
         print(text)
+        return
+
+    print("\033[{0}m{1}\033[0m".format(
+            colordict[color],
+            text))
 
 
 def calc_rel_time(acttime: int, basetime: int) -> str:
