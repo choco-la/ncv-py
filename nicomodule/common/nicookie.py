@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Print user_session value in Niconico."""
 
+from typing import Optional
 import http.cookiejar
 import re
 import sqlite3
@@ -14,25 +15,20 @@ def _main() -> None:
         exit(1)
 
     for cookie in sys.argv[1:]:
-        try:
-            if cookie.endswith(".sqlite"):
-                nicoUserSess = pull_usrsess_fx(cookie)
-            elif cookie.endswith(".wget"):
-                nicoUserSess = pull_usrsess_wg(cookie)
-            else:
-                nicoUserSess = pull_usrsess_lwp(cookie)
-        except:
-            trace = sys.exc_info()[1]
-            print("[ERR] {0}: {1}".format(cookie, trace))
+        if cookie.endswith(".sqlite"):
+            nicoUserSess = pull_usrsess_fx(cookie)
+        elif cookie.endswith(".wget"):
+            nicoUserSess = pull_usrsess_wg(cookie)
         else:
-            print("{0}: {1}".format(cookie, nicoUserSess))
+            nicoUserSess = pull_usrsess_lwp(cookie)
+        print("{0}: {1}".format(cookie, nicoUserSess))
 
 
 def _show_usage() -> None:
     print("Usage: {} [COOKIE]".format(__file__), file=sys.stderr)
 
 
-def pull_usrsess_fx(cookiedb: str) -> str:
+def pull_usrsess_fx(cookiedb: str) -> Optional[str]:
     """Pull user_session value from a mozilla cookie.
 
     Pull user_session value from firefox-like browser's
@@ -52,11 +48,14 @@ def pull_usrsess_fx(cookiedb: str) -> str:
                        WHERE "host" = ".nicovideo.jp" \
                        AND "name" = "user_session"'
         dbcursor.execute(dbstatement)
-        usersession = dbcursor.fetchone()[0]
+        try:
+            usersession = dbcursor.fetchone()[0]
+        except TypeError:
+            usersession = None
     return usersession
 
 
-def pull_usrsess_wg(cookie: str) -> str:
+def pull_usrsess_wg(cookie: str) -> Optional[str]:
     """Pull user_session value from a wget cookie.
 
     Pull user_session value from wget's cookies
@@ -75,13 +74,11 @@ def pull_usrsess_wg(cookie: str) -> str:
         if match:
             usersession = match.group(0).split()[-1]
         else:
-            sys.exit("[ERR] cookie: {} {}"
-                     .format(cookie,
-                             "no user_session value"))
+            usersession = None
     return usersession
 
 
-def pull_usrsess_lwp(cookie: str) -> str:
+def pull_usrsess_lwp(cookietxt: str) -> Optional[str]:
     """Pull user_session value from a LWPCookie.
 
     Pull user_session value from LWPCookies.
@@ -89,14 +86,25 @@ def pull_usrsess_lwp(cookie: str) -> str:
     http.cookiejar.LWPCookieJar().save() etc.
 
     Arguments:
-        cookie: Path to cookiefile.
+        cookietxt: Path to cookiefile.
 
     Returns:
         The user_session value of .nicovodeo.jp.
     """
     cj = http.cookiejar.LWPCookieJar()
-    cj.load(cookie)
-    return cj._cookies[".nicovideo.jp"]["/"]["user_session"].value
+    try:
+        cj.load(cookietxt)
+    except http.cookiejar.LoadError:
+        return None
+
+    usersession = None
+    for cookie in cj:
+        if cookie.domain != ".nicovideo.jp":
+            continue
+        if cookie.name == "user_session":
+            usersession = cookie.value
+
+    return usersession
 
 
 if __name__ == "__main__":

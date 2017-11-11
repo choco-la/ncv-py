@@ -59,14 +59,11 @@ def pull_usersession(cookie: str) -> str:
     """
     try:
         if cookie.endswith(".sqlite"):
-            usersession = (nicookie
-                           .pull_usrsess_fx(cookie))
+            usersession = (nicookie.pull_usrsess_fx(cookie))
         elif cookie.endswith(".wget"):
-            usersession = (nicookie
-                           .pull_usrsess_wg(cookie))
+            usersession = (nicookie.pull_usrsess_wg(cookie))
         else:
-            usersession = (nicookie
-                           .pull_usrsess_lwp(cookie))
+            usersession = (nicookie.pull_usrsess_lwp(cookie))
     except FileNotFoundError as err:
         error_exit(err, cookie)
     except IsADirectoryError as err:
@@ -76,6 +73,8 @@ def pull_usersession(cookie: str) -> str:
     except IOError as err:
         error_exit(err, cookie)
 
+    if usersession is None:
+        sys.exit("[ERR] Cookie has no session value: {0}".format(cookie))
     return usersession
 
 
