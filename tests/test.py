@@ -3,8 +3,9 @@
 """Unittest script."""
 # python3 -m unittest tests/test.py
 
-import unittest
 import os
+import unittest
+
 import nicomodule.common.nicoid as nicoid
 import nicomodule.common.genfilter as genfilter
 
@@ -12,8 +13,8 @@ import nicomodule.common.genfilter as genfilter
 class TestGrepUrl(unittest.TestCase):
     def test_grep_ch(self):
         self.assertEqual(
-          nicoid.grep_co("http://ch.nicovideo.jp/channel/ch1234?q=query"),
-          "ch1234")
+            nicoid.grep_co("http://ch.nicovideo.jp/channel/ch1234?q=query"),
+            "ch1234")
 
     def test_grep_lv(self):
         trueurls = [

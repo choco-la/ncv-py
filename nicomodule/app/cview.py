@@ -23,17 +23,17 @@ class Config():
         self.filterDir = os.path.join("filter", "")  # type: str
         self.logDir = os.path.join("log", "")  # type: str
         self.cookieFile = os.path.join(
-          self.cookieDir,
-          "cookie.txt")  # type: str
+            self.cookieDir,
+            "cookie.txt")  # type: str
         self.muteReCmt = os.path.join(
-          self.filterDir,
-          "mute-re-comment.txt")  # type: str
+            self.filterDir,
+            "mute-re-comment.txt")  # type: str
         self.nickNameId = os.path.join(
-          self.filterDir,
-          "nickname-id.txt")  # type: str
+            self.filterDir,
+            "nickname-id.txt")  # type: str
         self.nickNameAnon = os.path.join(
-          self.filterDir,
-          "nickname-anon.txt")  # type: str
+            self.filterDir,
+            "nickname-anon.txt")  # type: str
         self.use_cmt_filter = False  # type: bool
         self.logLimit = 20  # type: int
         self.nameLength = 12  # type: int
@@ -140,22 +140,22 @@ def name_handle(parsed: Dict[str, str],
         try:
             if parsed["anonymity"] == "0":
                 nickname.register_name(
-                  parsed["id"],
-                  registname,
-                  int(parsed["time"]),
-                  conf.nickNameId)
+                    parsed["id"],
+                    registname,
+                    int(parsed["time"]),
+                    conf.nickNameId)
                 # Reload namemap.
                 namemap = load_json(
-                            conf.nickNameId)
+                    conf.nickNameId)
             elif parsed["anonymity"] == "1":
                 nickname.register_name(
-                  parsed["id"],
-                  registname,
-                  int(parsed["time"]),
-                  conf.nickNameAnon)
+                    parsed["id"],
+                    registname,
+                    int(parsed["time"]),
+                    conf.nickNameAnon)
                 # Reload namemap.
                 namemap = load_json(
-                            conf.nickNameAnon)
+                    conf.nickNameAnon)
             reload = True
         except json.JSONDecodeError as err:
             error_exit(err,
@@ -173,9 +173,9 @@ def name_handle(parsed: Dict[str, str],
         pass
 
     parsed["nickname"], isnew = assign_nickname(
-                                  parsed["id"],
-                                  parsed["anonymity"],
-                                  namemap)
+        parsed["id"],
+        parsed["anonymity"],
+        namemap)
 
     if isnew is True:
         reload = True
@@ -234,8 +234,8 @@ def show_comment(parsed: Dict[str, str],
     name, wchar = trunc_name(parsed["nickname"], width)
     namearea = "[{2: ^" + str(width - wchar) + "}]"
     commenttime = calc_rel_time(
-                    int(parsed["time"]),
-                    starttime)
+        int(parsed["time"]),
+        starttime)
     fullcmt = (("{0}:{1}" + namearea + " {3} [{4}]")
                .format(parsed["no"],
                        pmark,
@@ -497,8 +497,8 @@ def print_color(text: str, color: str) -> None:
         return
 
     print("\033[{0}m{1}\033[0m".format(
-            colordict[color],
-            text))
+        colordict[color],
+        text))
 
 
 def calc_rel_time(acttime: int, basetime: int) -> str:

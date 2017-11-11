@@ -89,8 +89,7 @@ def save_cookie(url: str, data: Dict[str, str], cookie: str) -> None:
         Retry when it failed.
     """
     lwp = http.cookiejar.LWPCookieJar()
-    httpopener = build_opener(
-                   HTTPCookieProcessor(lwp))
+    httpopener = build_opener(HTTPCookieProcessor(lwp))
     encdata = urlencode(data).encode("utf-8")
 
     with httpopener.open(url, encdata):

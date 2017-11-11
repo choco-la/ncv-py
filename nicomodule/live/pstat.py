@@ -115,8 +115,7 @@ class LivePlayerStatus():
         # Official programs don't has default_community key.
         try:
             self.community = (streamtag.getElementsByTagName(
-                                "default_community")[0]
-                              .firstChild.data.strip())  # type: str
+                "default_community")[0].firstChild.data.strip())  # type: str
         except AttributeError:
             self.community = "official"
 

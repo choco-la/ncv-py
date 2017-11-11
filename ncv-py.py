@@ -133,15 +133,15 @@ def _main() -> None:
                                plyStat.community,
                                plyStat.lvid + ".txt")
         cview.write_file(
-          "# {0} : {1}".format(
-            plyStat.lvid,
-            plyStat.title),
-          logFile)
+            "# {0} : {1}".format(
+                plyStat.lvid,
+                plyStat.title),
+            logFile)
         cview.write_file(
-          "# {0} / {1}".format(
-            plyStat.owner,
-            plyStat.community),
-          logFile)
+            "# {0} / {1}".format(
+                plyStat.owner,
+                plyStat.community),
+            logFile)
     else:
         logFile = None
 
@@ -149,10 +149,10 @@ def _main() -> None:
     # socket.close() is called by __exit__.
     with niconnect.MsgSocket() as msgSock:
         msgSock.connect(
-          plyStat.addr,
-          plyStat.port,
-          plyStat.thread,
-          log=logLimit)
+            plyStat.addr,
+            plyStat.port,
+            plyStat.thread,
+            log=logLimit)
 
         # Program status: False: onair / True: ended
         isDisconnected = False
@@ -175,7 +175,7 @@ def _main() -> None:
                                                  nameMapId)
                     if toReload is True:
                         nameMapId = cview.load_json(
-                                      conf.nickNameId)
+                            conf.nickNameId)
                 # 184(anonymous) users
                 elif parsed["anonymity"] == "1":
                     toReload = cview.name_handle(parsed,
@@ -183,7 +183,7 @@ def _main() -> None:
                                                  nameMapAnon)
                     if toReload is True:
                         nameMapAnon = cview.load_json(
-                                        conf.nickNameAnon)
+                            conf.nickNameAnon)
 
                 # Break when "/disconnect" is sent by admin/broadcaster.
                 # Assign before mute.
@@ -217,37 +217,37 @@ def parse_args(conf: cview.Config) -> argparse.Namespace:
     #   lv[0-9]+ / co[0-9]+
     #   live/community page URL
     argParser.add_argument(
-      "url",
-      help="live/community URL",
-      metavar="lv[XXXX]/co[XXXX]")
+        "url",
+        help="live/community URL",
+        metavar="lv[XXXX]/co[XXXX]")
     # Logged in cookie.
     argParser.add_argument(
-      "-c", "--cookie",
-      help="specify cookie to use",
-      default=conf.cookieFile)
+        "-c", "--cookie",
+        help="specify cookie to use",
+        default=conf.cookieFile)
     # Whether save log.
     argParser.add_argument(
-      "-s", "--save-log",
-      help="save comment log",
-      action="store_true")
+        "-s", "--save-log",
+        help="save comment log",
+        action="store_true")
     # Past comment limit to acquire.
     # Don't use choices=range(0, 1001),
     # help becomes too verbose.
     argParser.add_argument(
-      "-l", "--limit",
-      help="comment log to get [0-1000]",
-      default=defaultlimit,
-      type=int)
+        "-l", "--limit",
+        help="comment log to get [0-1000]",
+        default=defaultlimit,
+        type=int)
     # Use mute filtering.
     argParser.add_argument(
-      "-f", "--use-filter",
-      help="use mute filter",
-      action="store_true")
+        "-f", "--use-filter",
+        help="use mute filter",
+        action="store_true")
     # Display in narrow mode.
     argParser.add_argument(
-      "-n", "--narrow",
-      help="narrow mode",
-      action="store_true")
+        "-n", "--narrow",
+        help="narrow mode",
+        action="store_true")
     return argParser.parse_args()
 
 

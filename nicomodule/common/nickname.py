@@ -33,7 +33,7 @@ def register_name(uid: str,
     """
     touch_json(filepath)
     decoder = json.JSONDecoder(
-      object_pairs_hook=collections.OrderedDict)
+        object_pairs_hook=collections.OrderedDict)
     name = name.replace(r"\\", r"\\")
     name = name.replace(r'"', r'\"')
 
