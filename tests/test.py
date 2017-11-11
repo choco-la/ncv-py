@@ -85,7 +85,7 @@ class TestFilter(unittest.TestCase):
         pass
 
     def test_filter_ignore(self):
-        self.assertEqual(len(self.filter.re_list), 6)
+        self.assertEqual(len(self.filter.re_set), 6)
 
     def test_filter_word_0(self):
         text = self.truelist[0]

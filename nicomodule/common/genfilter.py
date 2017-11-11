@@ -2,26 +2,26 @@
 # -*- coding: utf-8 -*-
 """Generate regex filtering dict."""
 
+from typing import (Pattern, Iterable, Set)
+import os
 import re
-from typing import (List, Pattern)
+import sre_constants
 
 
 class MatchFilter():
-    """The Class excecutes filtering method with list.
+    """The Class excecutes filtering method with set.
 
     Compiles filter words regex,
     use it to filtering check.
 
     Attributes:
-        __wordlist(list): Mute regex words list.
-        __regexlist(list): Compiled mute regex list.
+        __regexset Compiled mute regex set.
     """
 
     def __init__(self, filepath: str) -> None:
         """Constructor.
 
-        Set word list to own property.
-        Compile these regex words.
+        Set Compiled regex words to own property.
 
         Arguments:
             filepath: Regex words list text file.
@@ -29,71 +29,77 @@ class MatchFilter():
         Returns:
             None
         """
-        self.__wordlist = self.gen_word_list(filepath)
-        self.__regexlist = self.gen_reg_list(self.__wordlist)
+        words = gen_word_set(filepath)
+        self.__regexset = gen_reg_set(words)  # type: Set[Pattern]
 
     @property
-    def re_list(self) -> List[Pattern]:
-        return self.__regexlist
+    def word_set(self) -> Set[str]:
+        words = {regex.pattern for regex in self.__regexset}
+        return words
 
-    def gen_word_list(self, filepath: str) -> List[str]:
-        """Generate filtering word list.
-
-        Generate list object from text file.
-
-        Arguments:
-            filepath: Path to text file of mute regex words.
-
-        Returns:
-            Words list of regex.
-        """
-        with open(filepath) as fopen:
-            words = fopen.readlines()
-        wordlist = []
-        for word in words:
-            ignorecondition = (word.startswith("#") or
-                               word == "\n")
-            if not ignorecondition:
-                wordlist.append(word.strip())
-        return wordlist
-
-    def gen_reg_list(self, words: List[str]) -> List[Pattern]:
-        """Generate filtering compiled regex list.
-
-        Generate list object from words list.
-
-        Arguments:
-            words: Words list of regex.
-
-        Returns:
-            Compiled regex list.
-        """
-        reglist = []
-        for word in words:
-            try:
-                # escaping quote/dquote is not needed.
-                regex = re.compile(word.replace(r"\\", r"\\"))
-            # Invalid regex causes sre_constants.error,
-            # but NameError occurs.
-            # -> `import sre_constants.error` is needed.
-            except Exception:
-                pass
-            else:
-                reglist.append(regex)
-        return reglist
+    @property
+    def re_set(self) -> Set[Pattern]:
+        return self.__regexset
 
     def ismatch(self, text: str) -> bool:
         """Check text matchs regex.
 
-        Check if text matches regex list in even one.
+        Check if text matches regex set in even one.
 
         Arguments:
-            text: strings to check with regex list.
+            text: strings to check with regex set.
 
         Returns:
             If matches in even one, True. If not, False.
         """
-        return any(_.search(text) for _ in self.__regexlist)
+        return any(_.search(text) for _ in self.__regexset)
+
+
+def gen_reg_set(words: Iterable[str]) -> Set[Pattern]:
+    """Generate filtering compiled regex set.
+
+    Generate set object from words.
+
+    Arguments:
+        words: Iterable words of regex.
+
+    Returns:
+        Compiled regex set.
+    """
+    regset = set()
+    for word in words:
+        try:
+            # escaping quote/dquote is not needed.
+            regex = re.compile(word.replace(r"\\", r"\\"))
+        except sre_constants.error:
+            pass
+        else:
+            regset.add(regex)
+    return regset
+
+
+def gen_word_set(txtfile: str) -> Set[str]:
+    """Generate strings set from text file.
+    """
+    try:
+        with open(txtfile, "r") as fopen:
+            wordset = {ln.strip() for ln in fopen if not ignore(ln)}
+    except FileNotFoundError:
+        return set()
+    except IOError:
+        return set()
+
+    return wordset
+
+
+def ignore(line: str) -> bool:
+    """Ignore comment/blank lines.
+    """
+    conditions = (
+        line.startswith("#"),
+        line == os.linesep
+    )
+    return any(conditions)
 
 
 if __name__ == "__main__":
