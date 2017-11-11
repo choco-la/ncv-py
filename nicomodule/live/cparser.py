@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """Comment displaying format."""
 
+from typing import Dict
 from xml.dom import minidom
 import xml.parsers.expat
-from typing import Dict
 
 
 def parse_comment(dom: str) -> Dict[str, str]:
@@ -27,7 +27,7 @@ def parse_comment(dom: str) -> Dict[str, str]:
         pstr = minidom.parseString(dom)
     # If it is not complete dom, mark it as "partial"
     # to concatinate to the next data.
-    except xml.parsers.expat.ExpatError as err:
+    except xml.parsers.expat.ExpatError:
         resp = {
             "tag": "partial",
             "data": dom
@@ -36,11 +36,11 @@ def parse_comment(dom: str) -> Dict[str, str]:
 
     try:
         chat = pstr.getElementsByTagName("chat")[0]
-    except IndexError as err:
+    except IndexError:
         try:
-            thread = pstr.getElementsByTagName("thread")[0]
-        except:
-            None
+            _ = pstr.getElementsByTagName("thread")[0]
+        except IndexError:
+            pass
         # Initial recieved data.
         else:
             tag = "thread"
@@ -52,7 +52,7 @@ def parse_comment(dom: str) -> Dict[str, str]:
         # KeyError occurs on official programs.
         try:
             commentno = chat.attributes["no"].value
-        except KeyError as err:
+        except KeyError:
             commentno = "-"
 
         time = str(chat.attributes["date"].value)
@@ -61,25 +61,25 @@ def parse_comment(dom: str) -> Dict[str, str]:
         # Free members don't have premium key.
         try:
             premium = chat.attributes["premium"].value
-        except KeyError as err:
+        except KeyError:
             premium = "0"
 
         # ID users don't have anonymity key.
         try:
             anonymity = chat.attributes["anonymity"].value
-        except KeyError as err:
+        except KeyError:
             anonymity = "0"
 
         # Owner don't has locale key.
         try:
             locale = chat.attributes["locale"].value
-        except KeyError as err:
+        except KeyError:
             locale = "ja-jp"
 
         # If score is 0, dont have score key.
         try:
             score = chat.attributes["score"].value
-        except KeyError as err:
+        except KeyError:
             score = "0"
 
         # Comment content.

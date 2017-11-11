@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 """Niconico comment viewer using nicomodule."""
 
-import sys
-import re
-import os
 import argparse
-from json import JSONDecodeError
+import os
+import sys
 
 from nicomodule.common import (genfilter,
                                nicoid,
@@ -15,7 +13,6 @@ from nicomodule.live import (cparser,
                              niconnect,
                              pstat)
 from nicomodule.app import cview
-from typing import Dict
 
 
 def _main() -> None:
@@ -119,7 +116,7 @@ def _main() -> None:
                  .format(liveId, plyStat.errcode))
 
     # Check if logLimit is valid format.
-    if (parsedArgs.limit >= 0 and parsedArgs.limit <= 1000):
+    if parsedArgs.limit >= 0 and parsedArgs.limit <= 1000:
         logLimit = parsedArgs.limit
     elif parsedArgs.limit < 0:
         logLimit = 0

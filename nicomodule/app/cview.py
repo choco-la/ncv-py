@@ -4,12 +4,12 @@
 Load from the parent directory.
 """
 
-import sys
-import re
-import os
 from typing import (Tuple, Dict, cast)
-import unicodedata
 import json
+import os
+import re
+import sys
+import unicodedata
 
 from nicomodule.common import (nicookie,
                                nickname,
@@ -67,15 +67,13 @@ def pull_usersession(cookie: str) -> str:
         else:
             usersession = (nicookie
                            .pull_usrsess_lwp(cookie))
-    except IOError as err:
-        error_exit(err, cookie)
     except FileNotFoundError as err:
         error_exit(err, cookie)
     except IsADirectoryError as err:
         error_exit(err, cookie)
     except PermissionError as err:
         error_exit(err, cookie)
-    except Exception as err:
+    except IOError as err:
         error_exit(err, cookie)
 
     return usersession
@@ -98,25 +96,25 @@ def login_nico(cookie: str) -> None:
     nauth.save_cookie(loginurl, postdata, cookie)
 
 
-def mk_dir(dir: str) -> None:
+def mk_dir(newdir: str) -> None:
     """Make a directory if not exists.
 
     Make a directory to save a logFile like $(mkdir -p).
 
     Arguments:
-        dir: The Directory path to create.
+        newdir: The Directory path to create.
 
     Returns:
         None
     """
     try:
-        os.makedirs(dir, exist_ok=True)
-    except IOError as err:
-        error_exit(err, dir)
+        os.makedirs(newdir, exist_ok=True)
     except FileExistsError as err:
-        error_exit(err, dir)
+        error_exit(err, newdir)
     except PermissionError as err:
-        error_exit(err, dir)
+        error_exit(err, newdir)
+    except IOError as err:
+        error_exit(err, newdir)
 
 
 def name_handle(parsed: Dict[str, str],
@@ -162,13 +160,13 @@ def name_handle(parsed: Dict[str, str],
         except json.JSONDecodeError as err:
             error_exit(err,
                        conf.nickNameId)
-        except IOError as err:
-            error_exit(err,
-                       conf.nickNameId)
         except IsADirectoryError as err:
             error_exit(err,
                        conf.nickNameId)
         except PermissionError as err:
+            error_exit(err,
+                       conf.nickNameId)
+        except IOError as err:
             error_exit(err,
                        conf.nickNameId)
     else:
@@ -233,7 +231,7 @@ def show_comment(parsed: Dict[str, str],
         color = "default"
 
     # Truncate display name to configured length.
-    nickname, wchar = trunc_name(parsed["nickname"], width)
+    name, wchar = trunc_name(parsed["nickname"], width)
     namearea = "[{2: ^" + str(width - wchar) + "}]"
     commenttime = calc_rel_time(
                     int(parsed["time"]),
@@ -241,7 +239,7 @@ def show_comment(parsed: Dict[str, str],
     fullcmt = (("{0}:{1}" + namearea + " {3} [{4}]")
                .format(parsed["no"],
                        pmark,
-                       nickname,
+                       name,
                        parsed["content"],
                        commenttime))
 
@@ -278,9 +276,9 @@ def narrow_comment(parsed: Dict[str, str],
         color = "default"
 
     width = int(width * 2 / 3)
-    nickname, wchar = trunc_name(parsed["nickname"], width)
+    wchar = trunc_name(parsed["nickname"], width)[1]
     namearea = "[{0: ^" + str(width - wchar) + "}]"
-    nname, _ = trunc_name(parsed["nickname"], width)
+    nname = trunc_name(parsed["nickname"], width)[0]
     # Which is better,
     # substrings re.sub([letter count], ...)
     # or
@@ -322,11 +320,11 @@ def load_json(filepath: str) -> Dict[str, NameProp]:
             namemap = json.load(jsonf)
     except json.JSONDecodeError as err:
         error_exit(err, filepath)
-    except IOError as err:
-        error_exit(err, filepath)
     except IsADirectoryError as err:
         error_exit(err, filepath)
     except PermissionError as err:
+        error_exit(err, filepath)
+    except IOError as err:
         error_exit(err, filepath)
 
     return namemap
@@ -354,7 +352,7 @@ def should_register(text: str, uid: str, namemap: Dict[str, NameProp]) -> bool:
         try:
             prop = namemap[uid]
         # Not registered.
-        except KeyError as err:
+        except KeyError:
             return True
 
         # If nickname is not fixed, register nickname.
@@ -388,14 +386,14 @@ def assign_nickname(uid: str,
     try:
         nameprop = namemap[uid]["name"]
         return (cast(str, nameprop), False)
-    except KeyError as err:
+    except KeyError:
         pass
 
     # Retrieve username if not anon comment.
     if isanon == "0":
         try:
             return (nickname.retrieve_name(uid), True)
-        except IOError as err:
+        except IOError:
             return (uid, False)
     elif isanon == "1":
         return (uid, False)
@@ -547,11 +545,11 @@ def write_file(text: str, filepath: str) -> None:
     try:
         with open(filepath, "a") as log:
             log.write("{0}\n".format(text))
-    except IOError as err:
-        error_exit(err, filepath)
     except IsADirectoryError as err:
         error_exit(err, filepath)
     except PermissionError as err:
+        error_exit(err, filepath)
+    except IOError as err:
         error_exit(err, filepath)
 
 

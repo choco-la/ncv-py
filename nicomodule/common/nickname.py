@@ -2,17 +2,17 @@
 # -*- coding: utf-8 -*-
 """Retrieve, register, assign the nickname."""
 
-import re
-import json
-import collections
-import os.path
-import urllib.request
-import urllib.error
-from xml.dom import minidom
 from time import sleep
+from xml.dom import minidom
+import collections
+import json
+import os.path
+import re
+import urllib.error
+import urllib.request
 
 
-def register_name(id: str,
+def register_name(uid: str,
                   name: str,
                   time: int,
                   filepath: str) -> None:
@@ -23,7 +23,7 @@ def register_name(id: str,
     format: {id: {"name": name, "time": time, fixed: 0}}
 
     Arguments:
-        id: The commented user id.
+        uid: The commented user id.
         name: The nickname to register.
         time: Registed time.
         filepath: Path to a json file to dump.
@@ -46,7 +46,7 @@ def register_name(id: str,
         "time": time,
         "fixed": 0
     }
-    namedict[id] = add
+    namedict[uid] = add
 
     with open(filepath, "w") as jsonf:
         json.dump(namedict,
@@ -72,7 +72,7 @@ def touch_json(filepath: str) -> None:
 
 
 # TODO: not known what condition required to seiga-name.
-def retrieve_name(id: str) -> str:
+def retrieve_name(uid: str) -> str:
     """Retrieve username.
 
     Retrieve the username of niconico.
@@ -80,7 +80,7 @@ def retrieve_name(id: str) -> str:
     If failed, it try to retrieve by the iframe page.
 
     Arguments:
-        id: The UserID to retrieve its name.
+        uid: The UserID to retrieve its name.
 
     Returns:
         The retrieved username if it succeeded,
@@ -89,30 +89,30 @@ def retrieve_name(id: str) -> str:
     # Not to send Excessive requests.
     sleep(1)
     try:
-        return retr_name_seiga(id)
+        return retr_name_seiga(uid)
     # some users are 404
-    except urllib.error.HTTPError as err:
+    except urllib.error.HTTPError:
         try:
-            return retr_name_iframe(id)
-        except urllib.error.HTTPError as err:
-            return id
-        except AttributeError as err:
-            return id
+            return retr_name_iframe(uid)
+        except urllib.error.HTTPError:
+            return uid
+        except AttributeError:
+            return uid
 
 
-def retr_name_seiga(id: str) -> str:
+def retr_name_seiga(uid: str) -> str:
     """Retrieve an username with seiga API.
 
     Retrieve an username from seiga API's json.
     It may failed for some users.
 
     Arguments:
-        id: A userID to retrieve its name.
+        uid: A userID to retrieve its name.
 
     Returns:
         Retrieved username.
     """
-    url = "http://seiga.nicovideo.jp/api/user/info?id={0}".format(id)
+    url = "http://seiga.nicovideo.jp/api/user/info?id={0}".format(uid)
     req = urllib.request.Request(url)
     with urllib.request.urlopen(req) as resp:
         pstr = minidom.parseString(resp.read().decode("utf-8"))
@@ -120,14 +120,14 @@ def retr_name_seiga(id: str) -> str:
     return nicknametag.firstChild.data
 
 
-def retr_name_iframe(id: str) -> str:
+def retr_name_iframe(uid: str) -> str:
     """Retrieve an username with iframe.
 
     Retrieve an username from the user iframe.
     It probably succeed unlike seiga API.
 
     Arguments:
-        id: A user id to retrieve its name.
+        uid: A user id to retrieve its name.
 
     Returns:
         Retrieved username.
@@ -137,10 +137,10 @@ def retr_name_iframe(id: str) -> str:
         ElementTree causes a ParseError.
         lxml.html is not a stadard library.
     """
-    url = "http://ext.nicovideo.jp/thumb_user/{0}".format(id)
+    url = "http://ext.nicovideo.jp/thumb_user/{0}".format(uid)
     req = urllib.request.Request(url)
     regex = (r'<p class="TXT12"><a href="'
-             r'http://www.nicovideo.jp/user/' + id + r'"'
+             r'http://www.nicovideo.jp/user/' + uid + r'"'
              r' target="_blank"><strong>(.+)</strong></a></p>')
     with urllib.request.urlopen(req) as resp:
         return re.search(regex, resp.read().decode("utf-8")).group(1)

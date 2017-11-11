@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """Connect to the comment server."""
 
-import socket
 from typing import List
+import socket
 
 
 class MsgSocket():

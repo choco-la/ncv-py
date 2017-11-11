@@ -76,7 +76,7 @@ class MatchFilter():
             # Invalid regex causes sre_constants.error,
             # but NameError occurs.
             # -> `import sre_constants.error` is needed.
-            except Exception as err:
+            except Exception:
                 pass
             else:
                 reglist.append(regex)

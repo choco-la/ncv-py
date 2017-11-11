@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """Print user_session value in Niconico."""
 
-import sys
-import sqlite3
-import re
 import http.cookiejar
+import re
+import sqlite3
+import sys
 
 
 def _main() -> None:

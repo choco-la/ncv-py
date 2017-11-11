@@ -2,22 +2,21 @@
 # -*- coding: utf-8 -*-
 """Authentication module for niconico."""
 
-import urllib.request
-from urllib.request import (build_opener, HTTPCookieProcessor)
-from urllib.parse import urlencode
-import http.cookiejar
-import sys
-import os
 from getpass import getpass
-import re
 from typing import Dict
+from urllib.parse import urlencode
+from urllib.request import (build_opener, HTTPCookieProcessor)
+import http.cookiejar
+import os
+import re
+import sys
 
 
 def _main() -> None:
     cookieDir = os.path.join("cookie", "")
     try:
         os.makedirs(cookieDir, exist_ok=True)
-    except IOError as err:
+    except IOError:
         sys.exit("[ERR] {0}: Cannot access.".format(cookieDir))
 
     cookieFile = "cookie.txt"
@@ -94,7 +93,7 @@ def save_cookie(url: str, data: Dict[str, str], cookie: str) -> None:
                    HTTPCookieProcessor(lwp))
     encdata = urlencode(data).encode("utf-8")
 
-    with httpopener.open(url, encdata) as resp:
+    with httpopener.open(url, encdata):
         lwp.save(cookie)
 
 

@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 """Parse getplayerstatus.xml."""
 
-import sys
-from xml.dom import minidom
-import urllib
-from urllib import request
 from typing import Optional
+from urllib import request
+from xml.dom import minidom
+import sys
 
 
 def _main() -> None:
@@ -97,7 +96,7 @@ class LivePlayerStatus():
 
         try:
             errtag = body.getElementsByTagName("error")[0]
-        except IndexError as err:
+        except IndexError:
             self.errcode = None  # type: Optional[str]
         else:
             self.errcode = (errtag.getElementsByTagName("code")[0]
@@ -118,14 +117,14 @@ class LivePlayerStatus():
             self.community = (streamtag.getElementsByTagName(
                                 "default_community")[0]
                               .firstChild.data.strip())  # type: str
-        except AttributeError as err:
+        except AttributeError:
             self.community = "official"
 
         # Official programs don't has owner_name key.
         try:
             self.owner = (streamtag.getElementsByTagName("owner_name")[0]
                           .firstChild.data.strip())  # type: str
-        except AttributeError as err:
+        except AttributeError:
             self.owner = "official"
 
         usertag = body.getElementsByTagName("user")[0]
@@ -137,7 +136,7 @@ class LivePlayerStatus():
         try:
             self.rtmpurl = (rtmp.getElementsByTagName("url")[0]
                             .firstChild.data.strip())  # type: str
-        except AttributeError as err:
+        except AttributeError:
             pass
         self.ticket = (rtmp.getElementsByTagName("ticket")[0]
                        .firstChild.data.strip())  # type: str
