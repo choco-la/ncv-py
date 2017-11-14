@@ -185,12 +185,11 @@ def _main() -> None:
             isDisconnected = all([parsed["content"] == "/disconnect",
                                   int(parsed["premium"]) > 1])
 
-            checkCondition = [
-                conf.use_cmt_filter,
-                cmtFilter
-            ]
-            if all(checkCondition):
-                if cmtFilter.ismatch(parsed["content"]):
+            if conf.use_cmt_filter and cmtFilter:
+                souldMute = cmtFilter.ismatch(parsed["content"])
+                if souldMute and isDisconnected:
+                    break
+                elif souldMute:
                     continue
 
             if conf.narrow is False:

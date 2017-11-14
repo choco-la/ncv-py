@@ -102,7 +102,6 @@ class MsgSocket():
                 else:
                     partstr = decdata
 
-
     def close(self) -> None:
         """Close socket.
 

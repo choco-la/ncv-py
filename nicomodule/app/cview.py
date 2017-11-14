@@ -292,8 +292,8 @@ def narrow_comment(parsed: Dict[str, str],
     but _ is white space.
     """
     ncontent = re.sub(r"(?P<m>.{,16})",
-                      "{0}\g<m>{1}".format(" " * 11,
-                                           os.linesep),
+                      r"{0}\g<m>{1}".format(" " * 11,
+                                            os.linesep),
                       parsed["content"])
     ncontent = re.sub(r"(?:^[\s]{11}|\n$)", "", ncontent)
     fullcmt = ((namearea + " {1}")
