@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Connect to the comment server."""
 
-from typing import List
+from typing import (List, Iterable)
 import socket
 
 
@@ -73,40 +73,35 @@ class MsgSocket():
         rawdata = self.__msgsock.recv(buffer).split(endbyte)
         return rawdata
 
-    def recv_comments(self, partstr: str=None) -> List[str]:
-        """Returns comment data.
+    def recv_comments(self) -> Iterable[str]:
+        """Yield comment data.
 
-        Returns comment dom data recieved from socket.
-        If partial dom passed,
-        concatenate with recieved strings
-        (assert it also to be partial).
+        Yield comment dom data recieved from socket.
+        This works as generator.
 
         Argument:
-            partstr: A partial dom strings.
+            None
 
         Returns:
             List of comment dom strings.
         """
-        rawdata = self.receive()
-        comments = []
-        for rawdatum in rawdata:
-            decdata = rawdatum.decode("utf-8", "ignore")
-            if partstr:
-                decdata = partstr + decdata
-                partstr = None
+        partstr = None
+        while True:
+            rawdata = self.receive()
+            for rawdatum in rawdata:
+                decdata = rawdatum.decode("utf-8", "ignore")
+                if partstr:
+                    decdata = partstr + decdata
+                    partstr = None
 
-            if decdata.endswith("</chat>"):
-                comments.append(decdata)
-            # thread tag ends with "/>"
-            elif decdata.endswith("/>"):
-                comments.append(decdata)
-            else:
-                partstr = decdata
+                if decdata.endswith("</chat>"):
+                    yield decdata
+                # thread tag ends with "/>"
+                elif decdata.endswith("/>"):
+                    yield decdata
+                else:
+                    partstr = decdata
 
-        if partstr:
-            comments += self.recv_comments(partstr)
-
-        return comments
 
     def close(self) -> None:
         """Close socket.

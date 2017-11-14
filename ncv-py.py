@@ -154,56 +154,53 @@ def _main() -> None:
             plyStat.thread,
             log=logLimit)
 
-        # Program status: False: onair / True: ended
-        isDisconnected = False
+        for comment in msgSock.recv_comments():
+            if logFile:
+                cview.write_file(comment, logFile)
 
-        while isDisconnected is False:
-            comments = msgSock.recv_comments()
-            for comment in comments:
-                if logFile:
-                    cview.write_file(comment, logFile)
+            parsed = cparser.parse_comment(comment)
 
-                parsed = cparser.parse_comment(comment)
+            if parsed["tag"] == "thread":
+                continue
 
-                if parsed["tag"] == "thread":
+            # ID users
+            if parsed["anonymity"] == "0":
+                toReload = cview.name_handle(parsed,
+                                             conf,
+                                             nameMapId)
+                if toReload is True:
+                    nameMapId = cview.load_json(
+                        conf.nickNameId)
+            # 184(anonymous) users
+            elif parsed["anonymity"] == "1":
+                toReload = cview.name_handle(parsed,
+                                             conf,
+                                             nameMapAnon)
+                if toReload is True:
+                    nameMapAnon = cview.load_json(
+                        conf.nickNameAnon)
+
+            # Break when "/disconnect" is sent by admin/broadcaster.
+            # Assign before mute.
+            isDisconnected = all([parsed["content"] == "/disconnect",
+                                  int(parsed["premium"]) > 1])
+
+            checkCondition = [
+                conf.use_cmt_filter,
+                cmtFilter
+            ]
+            if all(checkCondition):
+                if cmtFilter.ismatch(parsed["content"]):
                     continue
 
-                # ID users
-                if parsed["anonymity"] == "0":
-                    toReload = cview.name_handle(parsed,
-                                                 conf,
-                                                 nameMapId)
-                    if toReload is True:
-                        nameMapId = cview.load_json(
-                            conf.nickNameId)
-                # 184(anonymous) users
-                elif parsed["anonymity"] == "1":
-                    toReload = cview.name_handle(parsed,
-                                                 conf,
-                                                 nameMapAnon)
-                    if toReload is True:
-                        nameMapAnon = cview.load_json(
-                            conf.nickNameAnon)
-
-                # Break when "/disconnect" is sent by admin/broadcaster.
-                # Assign before mute.
-                isDisconnected = all([parsed["content"] == "/disconnect",
-                                      int(parsed["premium"]) > 1])
-
-                checkCondition = [
-                    conf.use_cmt_filter,
-                    cmtFilter
-                ]
-                if all(checkCondition):
-                    if cmtFilter.ismatch(parsed["content"]):
-                        continue
-
-                if conf.narrow is False:
-                    cview.show_comment(parsed,
-                                       plyStat.start,
-                                       conf.nameLength)
-                elif conf.narrow is True:
-                    cview.narrow_comment(parsed, conf.nameLength)
+            if conf.narrow is False:
+                cview.show_comment(parsed,
+                                   plyStat.start,
+                                   conf.nameLength)
+            elif conf.narrow is True:
+                cview.narrow_comment(parsed, conf.nameLength)
+            if isDisconnected:
+                break
 
     print("Program ended.")
 
