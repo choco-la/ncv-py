@@ -89,18 +89,17 @@ class MsgSocket():
         while True:
             rawdata = self.receive()
             for rawdatum in rawdata:
-                decdata = rawdatum.decode("utf-8", "ignore")
                 if partstr:
-                    decdata = partstr + decdata
+                    rawdatum = partstr + rawdatum
                     partstr = None
 
-                if decdata.endswith("</chat>"):
-                    yield decdata
+                if rawdatum.endswith(b"</chat>"):
+                    yield rawdatum.decode("utf-8")
                 # thread tag ends with "/>"
-                elif decdata.endswith("/>"):
-                    yield decdata
+                elif rawdatum.endswith(b"/>"):
+                    yield rawdatum.decode("utf-8")
                 else:
-                    partstr = decdata
+                    partstr = rawdatum
 
     def close(self) -> None:
         """Close socket.
