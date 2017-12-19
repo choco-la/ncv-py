@@ -492,12 +492,12 @@ def print_color(text: str, color: str) -> None:
         "sky": "96"
     }
     if color not in colordict.keys():
-        print(text)
+        print(text, flush=True)
         return
 
     print("\033[{0}m{1}\033[0m".format(
         colordict[color],
-        text))
+        text), flush=True)
 
 
 def calc_rel_time(acttime: int, basetime: int) -> str:
