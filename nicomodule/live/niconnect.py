@@ -94,7 +94,8 @@ class MsgSocket():
                     partstr = None
 
                 if rawdatum.endswith(b"</chat>"):
-                    yield rawdatum.decode("utf-8")
+                    # TODO: fix FC on Windows with emojis.
+                    yield rawdatum.decode("utf-8", "ignore")
                 # thread tag ends with "/>"
                 elif rawdatum.endswith(b"/>"):
                     yield rawdatum.decode("utf-8")
